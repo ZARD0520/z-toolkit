@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  nest-app:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    # depends_on:
+    #   - mysql-container
+    #   - redis-container
+    ports:
+      - 3001:3005
+    networks:
+      - common-network
+
+  # mysql-container:
+  #   image: mysql
+  #   volumes:
+  #     - /www/apps/docker-data/mysql:/var/lib/mysql
+  #   environment:
+  #     MYSQL_DATABASE: picals
+  #     MYSQL_ROOT_PASSWORD: xxxxxx
+  #   networks:
+  #     - common-network
+
+  # redis-container:
+  #   image: redis
+  #   volumes:
+  #     - /www/apps/docker-data/redis:/data
+  #   networks:
+  #     - common-network
+
+networks:
+  common-network:
+    driver: bridge

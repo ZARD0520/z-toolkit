@@ -8,3 +8,5 @@
 * 数据库映射配置
 <!-- TODO LIST -->
 * 服务端数据库环境搭建&&库表初始化
+<!-- https://developers.weixin.qq.com/doc/offiaccount/Getting_Started/Getting_Started_Guide.html -->
+* 接入微信公众号开发
