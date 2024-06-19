@@ -14,7 +14,7 @@ export class TransformInterceptor implements NestInterceptor {
     const url = context.getArgs()?.[0]?.url;
     return next.handle().pipe(
       map((data) => {
-        return url === WX_VALIDATE_URL
+        return url.includes(WX_VALIDATE_URL)
           ? data
           : {
               data,
