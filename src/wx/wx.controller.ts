@@ -17,7 +17,7 @@ export class WxController {
 
   @Get()
   getWx(@Query() query: WxValidQuery): string {
-    const token = 'z-tooltik';
+    const token = 'onlyy';
     const signature = query.signature;
     const timestamp = query.timestamp;
     const echostr = query.echostr;
