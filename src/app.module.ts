@@ -9,5 +9,6 @@ import { WxService } from './wx/wx.service';
   imports: [DatabaseModule],
   controllers: [AppController, WxController],
   providers: [AppService, WxService],
+  // middlewares: [XMLMiddleware]
 })
 export class AppModule {}

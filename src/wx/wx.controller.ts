@@ -1,14 +1,15 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
 import { WxService } from './wx.service';
 // import sha1 from 'sha1';
-import sha1 from 'sha1-plus';
 // const sha1 = require('sha1');
+import { XML } from '../xml/xml.decorator';
 
 interface WxValidQuery {
   signature: string;
   timestamp: string;
   echostr: string;
   nonce: string;
+  msg_signature?: string;
 }
 
 @Controller('wx')
@@ -16,27 +17,48 @@ export class WxController {
   constructor(private readonly wxService: WxService) {}
 
   @Get()
-  getWx(@Query() query: WxValidQuery): string {
-    const token = 'onlyy';
+  wxValidate(@Query() query: WxValidQuery): string {
     const signature = query.signature;
     const timestamp = query.timestamp;
     const echostr = query.echostr;
     const nonce = query.nonce;
 
-    const oriArray = [nonce, timestamp, token];
+    // this.wxService.getAccessToken();
 
-    oriArray.sort();
+    return this.wxService.validate(timestamp, nonce, signature)
+      ? echostr
+      : 'InValide Server';
+  }
 
-    const original = oriArray.join('');
-    const sha = sha1(original);
+  @Post()
+  @HttpCode(200)
+  async onMessage(@Query() query: WxValidQuery, @XML() xmlPromise: any) {
+    // 校验消息是否来自微信服务器
+    const xml = await xmlPromise;
+    const { Encrypt } = xml;
+    const { timestamp, nonce, msg_signature: signature } = query;
+    const isFromWxServer = this.wxService.validate(
+      timestamp,
+      nonce,
+      signature!,
+      Encrypt,
+    );
+    if (!isFromWxServer) return '';
 
-    if (signature === sha) {
-      //验证成功
-      return echostr;
-    } else {
-      //验证失败
-      return 'Invalid';
-    }
-    // return this.wxService.getHello();
+    const decrypted = this.wxService.decryptMessage(Encrypt);
+
+    const result = this.wxService.handleMessage(decrypted);
+    // const encrypted = this.wxService.encryptMessage(result);
+
+    console.log(result, query);
+
+    // const response = `<xml>
+    //   <Encrypt><![CDATA[${encrypted}]]></Encrypt>
+    //   <MsgSignature><![CDATA[${this.wxService.generateSignature(result)}]]></MsgSignature>
+    //   <TimeStamp>${Date.now()}</TimeStamp>
+    //   <Nonce><![CDATA[${this.wxService.generateNonce()}]]></Nonce>
+    // </xml>`;
+
+    // return response;
   }
 }
