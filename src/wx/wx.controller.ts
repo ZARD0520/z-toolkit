@@ -1,8 +1,6 @@
-import { Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
-import { WxService } from './wx.service';
-// import sha1 from 'sha1';
-// const sha1 = require('sha1');
+import { Controller, Get, Header, HttpCode, Post, Query } from '@nestjs/common';
 import { XML } from '../xml/xml.decorator';
+import { WxService } from './wx.service';
 
 interface WxValidQuery {
   signature: string;
@@ -32,6 +30,7 @@ export class WxController {
 
   @Post()
   @HttpCode(200)
+  @Header('Content-Type', 'application/xml')
   async onMessage(@Query() query: WxValidQuery, @XML() xmlPromise: any) {
     // 校验消息是否来自微信服务器
     const xml = await xmlPromise;
@@ -45,12 +44,19 @@ export class WxController {
     );
     if (!isFromWxServer) return '';
 
-    const decrypted = this.wxService.decryptMessage(Encrypt);
+    // console.log(xml);
+    const message = this.wxService.handleMessage(Encrypt);
+    const response = this.wxService.generateResponse(message, nonce);
+    return response;
 
-    const result = this.wxService.handleMessage(decrypted);
-    // const encrypted = this.wxService.encryptMessage(result);
+    // const result = this.wxService.handleMessage(decrypted);
+    // const encrypt = this.wxService.encryptMessage(result);
 
-    console.log(result, query);
+    // console.log(result, query);
+    // console.log('收到消息：', Content);
+
+    // const response = await this.wxService.generateResponse(nonce, encrypt);
+    // return response;
 
     // const response = `<xml>
     //   <Encrypt><![CDATA[${encrypted}]]></Encrypt>
