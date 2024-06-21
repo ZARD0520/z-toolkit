@@ -140,7 +140,7 @@ export class WxService {
   async generateResponse(message: WxMessage, nonce: string) {
     const content = message.Content;
 
-    const responseText = this.generateResponseText(content);
+    const responseText = await this.generateResponseText(content);
 
     const timestamp = Date.now().toString();
     const xmlResponse = `<xml>
@@ -173,7 +173,9 @@ export class WxService {
     return xmlResponse;
   }
   // 处理消息，调用AI接口获取回复内容并返回回复内容中的字符串
-  generateResponseText(text: string) {
+  async generateResponseText(text: string) {
+    const result = await axios.post('/api/chat/once', { content: text });
+    console.log(result);
     return text;
   }
   /**
