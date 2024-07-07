@@ -1,24 +1,33 @@
 import { Injectable } from '@nestjs/common';
+import axios from 'axios';
+
 type ModelType = 'gpt' | 'spark';
 type ChatServiceName = 'sealGptMessage' | 'sealSparkMessage';
-
-enum MODEL_APP_IDS {
-  gpt = '',
-  spark = '11',
+type ChatInfo = {
+  url: string,
+  appId: string | undefined,
+  appSecret: string | undefined,
+  appKey: string | undefined
 }
 
-enum MODEL_APP_SECRETS {
-  gpt = '123',
-  spark = '',
+const getChatInfo = (model: string) => {
+  if (model === 'spark') {
+    return {
+      url: "https://spark-api-open.xf-yun.com/v1/chat/completions",
+      appId: process.env.XF_APP_ID,
+      appSecret: process.env.XF_APP_SECRET,
+      appKey: process.env.XF_APP_KEY
+    }
+  }
+  return null
 }
 
 @Injectable()
 export class ChatService {
   private defaultModel: ModelType = 'spark';
   private model = this.defaultModel;
-  // 大模型的key和secret
-  private modelAppId = MODEL_APP_IDS[this.model];
-  private modelAppSecret = MODEL_APP_SECRETS[this.model];
+  // 大模型的相关信息
+  private chatInfo = getChatInfo(this.model);
 
   sealMessage(text: string, model: ModelType = this.defaultModel) {
     const handlers: Record<ModelType, ChatServiceName> = {
@@ -33,11 +42,33 @@ export class ChatService {
   sealSparkMessage(text: string) {
     return text;
   }
-  // 发起请求获取大模型回应
-  getResponse(message: any) {
-    // todo: any类型记得换掉
-    // axios.post('', message);
 
+  // 获取大模型配置
+  setModelConfig(chatInfo: ChatInfo) {
+    return {
+      headers: {
+        Authorization: `Bearer ${chatInfo.appKey}:${chatInfo.appSecret}`
+      },
+      data: {
+        model: "generalv3.5",
+        message: [
+          {
+            role: "猫娘",
+            content: "你是哪个"
+          }
+        ],
+        stream: true
+      }
+    }
+  }
+
+  // 发起请求获取大模型回应
+  getResponse(message: string) {
+    if (this.chatInfo === null) {
+      return;
+    }
+    const { headers, data } = this.setModelConfig(this.chatInfo)
+    axios.post(this.chatInfo.url, { headers, json: data, stream: data.stream });
     return message;
   }
 }
