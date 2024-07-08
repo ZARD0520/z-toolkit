@@ -13,10 +13,9 @@ export class ChatController {
   }
   @Post('/once')
   async generateOneTimeAnswer(@Body() { content }: { content: string }) {
-    const message = this.chatService.sealMessage(content);
-    const response = this.chatService.getResponse(message);
-
-    const result = response; // todo: 编写服务从response中解出那条消息的内容文本
+    const message = await this.chatService.sealMessage(content);
+    const result = message; // todo: 编写服务从response中解出那条消息的内容文本
+    console.log(result);
     return result;
   }
 }

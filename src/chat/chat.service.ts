@@ -4,23 +4,23 @@ import axios from 'axios';
 type ModelType = 'gpt' | 'spark';
 type ChatServiceName = 'sealGptMessage' | 'sealSparkMessage';
 type ChatInfo = {
-  url: string,
-  appId: string | undefined,
-  appSecret: string | undefined,
-  appKey: string | undefined
-}
+  url: string;
+  appId: string | undefined;
+  appSecret: string | undefined;
+  appKey: string | undefined;
+};
 
 const getChatInfo = (model: string) => {
   if (model === 'spark') {
     return {
-      url: "https://spark-api-open.xf-yun.com/v1/chat/completions",
+      url: 'https://spark-api-open.xf-yun.com/v1/chat/completions',
       appId: process.env.XF_APP_ID,
       appSecret: process.env.XF_APP_SECRET,
-      appKey: process.env.XF_APP_KEY
-    }
+      appKey: process.env.XF_APP_KEY,
+    };
   }
-  return null
-}
+  return null;
+};
 
 @Injectable()
 export class ChatService {
@@ -40,35 +40,42 @@ export class ChatService {
     return text;
   }
   sealSparkMessage(text: string) {
-    return text;
+    return this.getResponse(text);
   }
 
   // 获取大模型配置
   setModelConfig(chatInfo: ChatInfo) {
     return {
       headers: {
-        Authorization: `Bearer ${chatInfo.appKey}:${chatInfo.appSecret}`
+        Authorization: `Bearer ${chatInfo.appKey}:${chatInfo.appSecret}`,
       },
       data: {
-        model: "generalv3.5",
+        model: 'generalv3.5',
         message: [
           {
-            role: "猫娘",
-            content: "你是哪个"
-          }
+            role: '猫娘',
+            content: '你是哪个',
+          },
         ],
-        stream: true
-      }
-    }
+        stream: true,
+      },
+    };
   }
 
   // 发起请求获取大模型回应
-  getResponse(message: string) {
+  async getResponse(message: string) {
     if (this.chatInfo === null) {
       return;
     }
-    const { headers, data } = this.setModelConfig(this.chatInfo)
-    axios.post(this.chatInfo.url, { headers, json: data, stream: data.stream });
-    return message;
+    console.log(message);
+    try {
+      const { headers, data } = this.setModelConfig(this.chatInfo);
+      const res = await axios.post(this.chatInfo.url, data, {
+        headers,
+      });
+      return res;
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
