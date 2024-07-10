@@ -51,9 +51,9 @@ export class ChatService {
       },
       data: {
         model: 'generalv3.5',
-        message: [
+        messages: [
           {
-            role: '猫娘',
+            role: 'user',
             content: '你是哪个',
           },
         ],
