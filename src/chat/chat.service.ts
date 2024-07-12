@@ -9,6 +9,14 @@ type ChatInfo = {
   appSecret: string | undefined;
   appKey: string | undefined;
 };
+type modelConfigType = {
+  headers: object;
+  data: {
+    model: string;
+    messages: Array<object>;
+    stream: boolean;
+  };
+};
 
 const getChatInfo = (model: string) => {
   if (model === 'spark') {
@@ -28,6 +36,7 @@ export class ChatService {
   private model = this.defaultModel;
   // 大模型的相关信息
   private chatInfo = getChatInfo(this.model);
+  private modelConfig: modelConfigType;
 
   sealMessage(text: string, model: ModelType = this.defaultModel) {
     const handlers: Record<ModelType, ChatServiceName> = {
@@ -44,22 +53,24 @@ export class ChatService {
   }
 
   // 获取大模型配置
-  setModelConfig(chatInfo: ChatInfo) {
-    return {
-      headers: {
-        Authorization: `Bearer ${chatInfo.appKey}:${chatInfo.appSecret}`,
-      },
-      data: {
-        model: 'generalv3.5',
-        messages: [
-          {
-            role: 'user',
-            content: '你是哪个',
-          },
-        ],
-        stream: true,
-      },
-    };
+  setModelConfig(chatInfo: ChatInfo, isStream = false) {
+    if (this.model === 'spark') {
+      this.modelConfig = {
+        headers: {
+          Authorization: `Bearer ${chatInfo.appKey}:${chatInfo.appSecret}`,
+        },
+        data: {
+          model: 'generalv3.5',
+          messages: [
+            {
+              role: 'user',
+              content: '你是哪个',
+            },
+          ],
+          stream: isStream,
+        },
+      };
+    }
   }
 
   // 发起请求获取大模型回应
@@ -69,10 +80,18 @@ export class ChatService {
     }
     console.log(message);
     try {
-      const { headers, data } = this.setModelConfig(this.chatInfo);
+      if (!this.modelConfig) {
+        this.setModelConfig(this.chatInfo);
+      }
+      const { headers, data } = this.modelConfig;
+      data.messages.push({
+        role: 'user',
+        content: message,
+      });
       const res = await axios.post(this.chatInfo.url, data, {
         headers,
       });
+      // 处理并返回最新一条消息
       return res;
     } catch (e) {
       console.error(e);
