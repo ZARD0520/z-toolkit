@@ -32,40 +32,80 @@ export class WxController {
   @HttpCode(200)
   @Header('Content-Type', 'application/xml')
   async onMessage(@Query() query: WxValidQuery, @XML() xmlPromise: any) {
-    // 校验消息是否来自微信服务器
-    const xml = await xmlPromise;
-    const { Encrypt } = xml;
-    const { timestamp, nonce, msg_signature: signature } = query;
-    const isFromWxServer = this.wxService.validate(
-      timestamp,
-      nonce,
-      signature!,
-      Encrypt,
-    );
-    if (!isFromWxServer) return '';
+    try {
+      // 定时4500秒没处理完则抛出错误并捕获，返回给用户超时提示
+      setTimeout(() => {
+        throw new Error('timeout');
+      }, 4500);
+      // 校验消息是否来自微信服务器
+      const xml = await xmlPromise;
+      const { Encrypt } = xml;
+      const { timestamp, nonce, msg_signature: signature } = query;
+      const isFromWxServer = this.wxService.validate(
+        timestamp,
+        nonce,
+        signature!,
+        Encrypt,
+      );
+      if (!isFromWxServer) return '';
 
-    // console.log(xml);
-    const message = this.wxService.handleMessage(Encrypt);
-    const response = this.wxService.generateResponse(message, nonce);
-    return response;
+      const message = this.wxService.handleMessage(Encrypt);
+      // console.log('\n\n==========xml:\n', xml, '\n====mesg:\n', message);
 
-    // const result = this.wxService.handleMessage(decrypted);
-    // const encrypt = this.wxService.encryptMessage(result);
-
-    // console.log(result, query);
-    // console.log('收到消息：', Content);
-
-    // const response = await this.wxService.generateResponse(nonce, encrypt);
-    // return response;
-
-    // const response = `<xml>
-    //   <Encrypt><![CDATA[${encrypted}]]></Encrypt>
-    //   <MsgSignature><![CDATA[${this.wxService.generateSignature(result)}]]></MsgSignature>
-    //   <TimeStamp>${Date.now()}</TimeStamp>
-    //   <Nonce><![CDATA[${this.wxService.generateNonce()}]]></Nonce>
-    // </xml>`;
-
-    // return response;
+      const generateFastResponse = (text: string) =>
+        this.wxService.sealResponseMsg({
+          content: { text },
+          nonce,
+          timestamp,
+          from: message.FromUserName,
+          to: message.ToUserName,
+        });
+      switch (message.MsgType) {
+        case 'text':
+          if (message.Content === '[收到不支持的消息类型，暂无法显示]') {
+            const text =
+              '身为高贵的智能体，我才不会试图看懂这些奇奇怪怪的东西。你们人类真是难以理解生物呢';
+            return generateFastResponse(text);
+          }
+          const response = this.wxService.generateResponse(message, nonce);
+          return response;
+        case 'image':
+          // const { PicUrl } = message
+          return generateFastResponse('收到图片啦，听我说谢谢你');
+        case 'voice':
+          // const { Format, Recognition, MediaId } = message
+          return generateFastResponse('人家听不清啦，才不是听不懂~');
+        case 'video':
+          return generateFastResponse(
+            '想约我看小视频呢？听我说谢谢你，不过人家可没这个兴趣哦！',
+          );
+        case 'location':
+          return generateFastResponse(`
+            这里不是${message.Label}嘛？附近大概有什么好玩的，可惜人家超级宅哦，根本不想出门
+          `);
+        case 'file':
+          const {
+            Title,
+            // Description,
+            // FileKey,
+            // FileMd5,
+            // FileTotalLen
+          } = message;
+          return generateFastResponse(
+            `嗯？这个文件是${Title}？我不晓得是干撒子用的嘞，我只想当个高贵的不用动脑子的AI！请不要给琥珀出这种难题啦！`,
+          );
+        case 'event':
+          const text =
+            '嗨，我是琥珀，我会简单的聊天哦！谢谢你这么可爱还关注我，接下来的日子里希望我们都能快快乐乐，一起向前';
+          return generateFastResponse(text);
+        default:
+          return generateFastResponse('你这发了个撒子东西哦，完全认不出来');
+      }
+    } catch (e) {
+      return e.message === 'timeout'
+        ? '这个问题太复杂，对方不想理你并朝你扔出来一块瓜皮'
+        : '不好意思，琥珀de大脑好像有点短路...';
+    }
   }
 
   @Get('msg')

@@ -15,6 +15,69 @@ interface WxMessage {
   Content: string;
 }
 
+
+
+interface TextMessage {
+  text: string
+}
+
+interface BaseMediaMessage {
+  media_id: string
+}
+
+interface ImageMessage extends BaseMediaMessage {}
+
+interface VoiceMessage extends BaseMediaMessage {}
+
+interface VedioMessage extends BaseMediaMessage {
+  title: string
+  description: string
+}
+
+interface MusicMessage extends VedioMessage {
+  music_url: string
+  hq_music_url: string
+}
+
+interface ArticalType {
+  title: string
+  description: string
+  pic_url: string
+  url: string
+}
+interface NewsMessage {
+  artical_count: number | string
+  articals: ArticalType[]
+}
+
+// type MessageContentType =
+//     TextMessage
+//   | ImageMessage
+//   | VoiceMessage
+//   | VedioMessage
+//   | MusicMessage
+//   | NewsMessage
+
+interface MessageContentType {
+  text: TextMessage;
+  image: ImageMessage;
+  voice: VoiceMessage;
+  vedio: VedioMessage;
+  music: MusicMessage;
+  news: NewsMessage;
+}
+
+type MessageType = keyof MessageContentType;
+
+interface ResponseMsgParams {
+  type?: MessageType;
+  content: MessageContentType[MessageType];
+  nonce: string;
+  timestamp: string;
+  from: string;
+  to: string;
+}
+
 const WX_APP_ID = 'wx52f22f40aeb34ad1';
 const WX_APP_SECRET = 'dacc89cdc914278d29acdd38495dcae4';
 const WX_TOKEN = 'onlyy';
@@ -143,12 +206,37 @@ export class WxService {
     const responseText = await this.generateResponseText(content);
 
     const timestamp = Date.now().toString();
+    return this.sealResponseMsg({
+      content: responseText,
+      nonce,
+      timestamp,
+      from: message.FromUserName,
+      to: message.ToUserName
+    });
+  }
+  // 处理消息，调用AI接口获取回复内容并返回回复内容中的字符串
+  async generateResponseText(text: string) {
+    const { data } = await axios.post('/api/chat/once', { content: text });
+    return data.data;
+  }
+
+  sealResponseMsg({
+    type = 'text', 
+    content, 
+    nonce, 
+    timestamp, 
+    from, 
+    to
+  }: ResponseMsgParams) {
+    const msgTypeTamplate = '<MsgType><![CDATA[text]]></MsgType>'
+    const xmlMsgType = msgTypeTamplate.replace('text', type);
+    const xmlContent = this.generateContent(type, content)
     const xmlResponse = `<xml>
-          <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
-          <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
+          <ToUserName><![CDATA[${from}]]></ToUserName>
+          <FromUserName><![CDATA[${to}]]></FromUserName>
           <CreateTime>${timestamp}</CreateTime>
-          <MsgType><![CDATA[text]]></MsgType>
-          <Content><![CDATA[${responseText}]]></Content>
+          ${xmlMsgType}
+          ${xmlContent}
         </xml>`;
 
     if (config.wechatMessageEncryptMode === '2') {
@@ -172,10 +260,69 @@ export class WxService {
 
     return xmlResponse;
   }
-  // 处理消息，调用AI接口获取回复内容并返回回复内容中的字符串
-  async generateResponseText(text: string) {
-    const { data } = await axios.post('/api/chat/once', { content: text });
-    return data.data;
+  generateContent(type: MessageType, content: MessageContentType[typeof type]) {
+    switch (type) {
+      case 'text':
+        const { text } = <TextMessage>content;
+        return `<Content><![CDATA[${text}]]></Content>`;
+      case 'image': {
+        const { media_id } = <ImageMessage>content;
+        return `
+          <Image>
+            <MediaId><![CDATA[${media_id}]]></MediaId>
+          </Image>
+        `;
+      }
+      case 'voice': {
+        const { media_id } = <VoiceMessage>content;
+        return `
+          <Voice>
+            <MediaId><![CDATA[${media_id}]]></MediaId>
+          </Voice>
+        `;
+      }
+      case 'vedio': {
+        const { media_id, title, description } = <VedioMessage>content;
+        return `
+          <Video>
+            <MediaId><![CDATA[${media_id}]]></MediaId>
+            <Title><![CDATA[${title}]]></Title>
+            <Description><![CDATA[${description}]]></Description>
+          </Video>
+        `;
+      }
+      case 'music': {
+        const { media_id, title, description, music_url, hq_music_url } = <
+          MusicMessage
+        >content;
+        return `
+          <Music>
+            <Title><![CDATA[${title}]]></Title>
+            <Description><![CDATA[${description}]]></Description>
+            <MusicUrl><![CDATA[${music_url}]]></MusicUrl>
+            <HQMusicUrl><![CDATA[${hq_music_url}]]></HQMusicUrl>
+            <ThumbMediaId><![CDATA[${media_id}]]></ThumbMediaId>
+          </Music>
+        `;
+      }
+      case 'news': {
+        const { artical_count, articals } = <NewsMessage>content
+        return `
+          <ArticleCount>${artical_count}</ArticleCount>
+          <Articles>
+            ${articals.map(({ title, description, pic_url, url }) => `
+                <item>
+                  <Title><![CDATA[${title}]]></Title>
+                  <Description><![CDATA[${description}]]></Description>
+                  <PicUrl><![CDATA[${pic_url}]]></PicUrl>
+                  <Url><![CDATA[${url}]]></Url>
+                </item>
+              `
+            )}
+          </Articles>
+        `;
+      }
+    }
   }
   /**
    * 删除补位

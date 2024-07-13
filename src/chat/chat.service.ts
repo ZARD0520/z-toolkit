@@ -110,11 +110,11 @@ export class ChatService {
       // 处理并返回最新一条消息
       return code === 0
         ? choices?.[0]?.message?.content ??
-            `垃圾微信出错啦，错误信息：${message}`
-        : `垃圾微信出错啦，错误信息：${message}`;
+            `辣鸡微信出错啦，错误信息：${message}`
+        : `辣鸡微信出错啦，错误信息：${message}`;
     } catch (e) {
-      console.error(e);
-      return `垃圾微信出错啦，错误信息：${e.message ?? e}`;
+      // console.error(e);
+      return `辣鸡微信出错啦，错误信息：${e.message ?? e}`;
     }
   }
 }
