@@ -148,7 +148,7 @@ export class WxService {
           <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
           <CreateTime>${timestamp}</CreateTime>
           <MsgType><![CDATA[text]]></MsgType>
-          <Content><![CDATA[${responseText}, 当然是真的，千真万确！]]></Content>
+          <Content><![CDATA[${responseText}]]></Content>
         </xml>`;
 
     if (config.wechatMessageEncryptMode === '2') {
@@ -166,7 +166,7 @@ export class WxService {
           <Nonce>${nonce}</Nonce>
         </xml>`;
 
-      console.log(content, result);
+      // console.log(content, result);
       return result;
     }
 
@@ -174,9 +174,8 @@ export class WxService {
   }
   // 处理消息，调用AI接口获取回复内容并返回回复内容中的字符串
   async generateResponseText(text: string) {
-    const result = await axios.post('/api/chat/once', { content: text });
-    console.log(result);
-    return text;
+    const { data } = await axios.post('/api/chat/once', { content: text });
+    return data.data;
   }
   /**
    * 删除补位

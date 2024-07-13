@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { RolePreset, rolePresetMap } from './role-presets';
 
 type ModelType = 'gpt' | 'spark';
 type ChatServiceName = 'sealGptMessage' | 'sealSparkMessage';
@@ -22,9 +23,12 @@ const getChatInfo = (model: string) => {
   if (model === 'spark') {
     return {
       url: 'https://spark-api-open.xf-yun.com/v1/chat/completions',
-      appId: process.env.XF_APP_ID,
-      appSecret: process.env.XF_APP_SECRET,
-      appKey: process.env.XF_APP_KEY,
+      // appId: process.env.XF_APP_ID,
+      // appSecret: process.env.XF_APP_SECRET,
+      // appKey: process.env.XF_APP_KEY,
+      appId: 'a2e05f02',
+      appSecret: 'NzRkNjM4NzE3ZDQ3Njc2ZWI0NzZmM2U4',
+      appKey: 'f1b4e3c0f41c6344b3d9ae997cd5a895',
     };
   }
   return null;
@@ -37,7 +41,11 @@ export class ChatService {
   // 大模型的相关信息
   private chatInfo = getChatInfo(this.model);
   private modelConfig: modelConfigType;
+  private rolePreset: string = rolePresetMap.cat;
 
+  setRolePreset(role: RolePreset) {
+    this.rolePreset = rolePresetMap[role];
+  }
   sealMessage(text: string, model: ModelType = this.defaultModel) {
     const handlers: Record<ModelType, ChatServiceName> = {
       gpt: 'sealGptMessage',
@@ -63,8 +71,8 @@ export class ChatService {
           model: 'generalv3.5',
           messages: [
             {
-              role: 'user',
-              content: '你是哪个',
+              role: 'system',
+              content: this.rolePreset,
             },
           ],
           stream: isStream,
@@ -74,11 +82,11 @@ export class ChatService {
   }
 
   // 发起请求获取大模型回应
-  async getResponse(message: string) {
+  async getResponse(text: string) {
     if (this.chatInfo === null) {
       return;
     }
-    console.log(message);
+
     try {
       if (!this.modelConfig) {
         this.setModelConfig(this.chatInfo);
@@ -86,15 +94,27 @@ export class ChatService {
       const { headers, data } = this.modelConfig;
       data.messages.push({
         role: 'user',
-        content: message,
+        content: text,
       });
-      const res = await axios.post(this.chatInfo.url, data, {
+      const {
+        data: {
+          code,
+          message,
+          choices,
+          // usage
+        },
+      } = await axios.post(this.chatInfo.url, data, {
         headers,
       });
+
       // 处理并返回最新一条消息
-      return res;
+      return code === 0
+        ? choices?.[0]?.message?.content ??
+            `垃圾微信出错啦，错误信息：${message}`
+        : `垃圾微信出错啦，错误信息：${message}`;
     } catch (e) {
       console.error(e);
+      return `垃圾微信出错啦，错误信息：${e.message ?? e}`;
     }
   }
 }

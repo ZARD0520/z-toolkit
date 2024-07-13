@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 @Controller('chat')
@@ -15,7 +15,13 @@ export class ChatController {
   async generateOneTimeAnswer(@Body() { content }: { content: string }) {
     const message = await this.chatService.sealMessage(content);
     const result = message; // todo: 编写服务从response中解出那条消息的内容文本
-    console.log(result);
+    return result;
+  }
+  @Get('/once')
+  async generateOneTimeAnswer2() {
+    const content = '黄俊杰是谁';
+    const message = await this.chatService.sealMessage(content);
+    const result = message; // todo: 编写服务从response中解出那条消息的内容文本
     return result;
   }
 }

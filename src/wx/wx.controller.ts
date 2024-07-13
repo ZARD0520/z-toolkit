@@ -67,4 +67,11 @@ export class WxController {
 
     // return response;
   }
+
+  @Get('msg')
+  handleMsg() {
+    const message = '你知道黄俊杰吗';
+    const response = this.wxService.generateResponseText(message);
+    return response;
+  }
 }
