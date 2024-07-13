@@ -12,10 +12,14 @@ import { stringify } from 'qs';
 interface WxMessage {
   FromUserName: string;
   ToUserName: string;
-  Content: string;
+  MsgType: MessageType;
+  MsgId: string;
+  Content?: string;
+  MediaId?: string;
+  PicUrl?: string;
+  Format?: string; // voice的格式
+  Recognition?: string;
 }
-
-
 
 interface TextMessage {
   text: string
@@ -200,14 +204,108 @@ export class WxService {
     return 'nonce-test';
   }
 
-  async generateResponse(message: WxMessage, nonce: string) {
-    const content = message.Content;
+  async generateTextMessageContent(message: WxMessage): Promise<TextMessage> {
+    const responseText = await this.generateResponseText(message.Content!);
+    return {
+      text: responseText
+    }
+  }
+  async generateImageMessageContent(message: WxMessage): Promise<ImageMessage> {
+    console.log('message:\n', message)
 
-    const responseText = await this.generateResponseText(content);
+    return {
+      media_id: message.MediaId!
+    }
+  }
+  async generateVoiceMessageContent(message: WxMessage): Promise<VoiceMessage> {
+    console.log('message:\n', message)
+
+    return {
+      media_id: message.MediaId!
+    }
+  }
+  async generateVedioMessageContent(message: WxMessage): Promise<VedioMessage> {
+    console.log('message:\n', message)
+
+    return {
+      media_id: 'aaa',
+      title: '娃哈哈',
+      description: 'whh'
+    }
+  }
+  async generateMusicMessageContent(message: WxMessage): Promise<MusicMessage> {
+    console.log('message:\n', message)
+
+    return {
+      media_id: 'aaa',
+      title: '唱歌',
+      description: 'music',
+      music_url: '',
+      hq_music_url: ''
+    }
+  }
+  async generateNewsMessageContent(message: WxMessage): Promise<NewsMessage> {
+    console.log('message:\n', message)
+
+    return {
+      artical_count: 2,
+      articals: [
+        {
+          title: '第一个',
+          description: 'no1',
+          pic_url: '',
+          url: ''
+        },
+        {
+          title: '第二个',
+          description: 'no2',
+          pic_url: '',
+          url: ''
+        }
+      ]
+    }
+  }
+  async generateResponse(message: WxMessage, nonce: string): Promise<string> {
+    // ts报错？！
+    // const handlers: Record<MessageType, Partial<keyof WxService>> = {
+    //   text: 'generateTextMessageContent',
+    //   image: 'generateImageMessageContent',
+    //   voice: 'generateVoiceMessageContent',
+    //   vedio: 'generateVedioMessageContent',
+    //   music: 'generateMusicMessageContent',
+    //   news: 'generateNewsMessageContent'
+    // }
+    // const content = await this[handlers.text](message)
+    // console.log('res-text:', content, message)
+
+    let content: MessageContentType[MessageType]
+    switch (message.MsgType) {
+      case 'text':
+        content = await this.generateTextMessageContent(message);
+        break;
+      case 'image':
+        content = await this.generateImageMessageContent(message);
+        break;
+      case 'voice':
+        content = await this.generateVoiceMessageContent(message);
+        break;
+      case 'vedio':
+        content = await this.generateVedioMessageContent(message);
+        break;
+      case 'music':
+        content = await this.generateMusicMessageContent(message);
+        break;
+      case 'news':
+        content = await this.generateNewsMessageContent(message);
+        break;
+      default:
+        content = await this.generateTextMessageContent(message);
+    }
 
     const timestamp = Date.now().toString();
     return this.sealResponseMsg({
-      content: responseText,
+      type: message.MsgType,
+      content,
       nonce,
       timestamp,
       from: message.FromUserName,
