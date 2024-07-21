@@ -1,6 +1,7 @@
 import { Controller, Get, Header, HttpCode, Post, Query } from '@nestjs/common';
 import { XML } from '../xml/xml.decorator';
 import { WxService } from './wx.service';
+import { ChatService } from 'src/chat/chat.service';
 
 interface WxValidQuery {
   signature: string;
@@ -12,7 +13,10 @@ interface WxValidQuery {
 
 @Controller('wx')
 export class WxController {
-  constructor(private readonly wxService: WxService) {}
+  constructor(
+    private readonly wxService: WxService,
+    private readonly chatService: ChatService,
+  ) {}
 
   @Get()
   wxValidate(@Query() query: WxValidQuery): string {
@@ -91,7 +95,7 @@ export class WxController {
   @Get('msg')
   async handleMsg() {
     const message = '你知道黄俊杰吗';
-    const response = await this.wxService.generateResponseText(message);
+    const response = await this.chatService.sealMessage(message);
     await this.wxService.getAccessToken();
     return response;
   }
