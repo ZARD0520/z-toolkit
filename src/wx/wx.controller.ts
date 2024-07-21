@@ -44,7 +44,7 @@ export class WxController {
     );
     if (!isFromWxServer) return '';
     const message = this.wxService.handleMessage(Encrypt);
-    return this.wxService.generateResponse(message, nonce)
+    return this.wxService.generateResponse(message, nonce);
     // switch (message.MsgType) {
     //   case 'text':
     //     if (message.Content === '[收到不支持的消息类型，暂无法显示]') {
@@ -92,7 +92,18 @@ export class WxController {
   async handleMsg() {
     const message = '你知道黄俊杰吗';
     const response = await this.wxService.generateResponseText(message);
-    await this.wxService.getAccessToken()
+    await this.wxService.getAccessToken();
     return response;
+  }
+
+  @Get('material')
+  async handleMaterial() {
+    const token = await this.wxService.getAccessToken();
+    const res = await this.wxService.getMaterialList(token, {
+      type: 'image',
+      offset: 0,
+      count: 1,
+    });
+    return res;
   }
 }

@@ -22,11 +22,11 @@ interface WxMessage {
 }
 
 interface TextMessage {
-  text: string
+  text: string;
 }
 
 interface BaseMediaMessage {
-  media_id: string
+  media_id: string;
 }
 
 interface ImageMessage extends BaseMediaMessage {}
@@ -34,24 +34,24 @@ interface ImageMessage extends BaseMediaMessage {}
 interface VoiceMessage extends BaseMediaMessage {}
 
 interface VedioMessage extends BaseMediaMessage {
-  title: string
-  description: string
+  title: string;
+  description: string;
 }
 
 interface MusicMessage extends VedioMessage {
-  music_url: string
-  hq_music_url: string
+  music_url: string;
+  hq_music_url: string;
 }
 
 interface ArticalType {
-  title: string
-  description: string
-  pic_url: string
-  url: string
+  title: string;
+  description: string;
+  pic_url: string;
+  url: string;
 }
 interface NewsMessage {
-  artical_count: number | string
-  articals: ArticalType[]
+  artical_count: number | string;
+  articals: ArticalType[];
 }
 
 // type MessageContentType =
@@ -132,6 +132,21 @@ export class WxService {
 
     return this.accessToken;
   }
+  // 获取素材列表
+  async getMaterialList(
+    token: string,
+    data: { type: string; offset: number; count: number },
+  ) {
+    const params = stringify({
+      access_token: token,
+    });
+    const res = await axios.post(
+      `https://api.weixin.qq.com/cgi-bin/material/batchget_material?${params}`,
+      data,
+    );
+    return res;
+  }
+
   /**
    * 对密文进行解密
    * @param {String} encodedMsg    待解密的密文
@@ -207,45 +222,45 @@ export class WxService {
   async generateTextMessageContent(message: WxMessage): Promise<TextMessage> {
     const responseText = await this.generateResponseText(message.Content!);
     return {
-      text: responseText
-    }
+      text: responseText,
+    };
   }
   async generateImageMessageContent(message: WxMessage): Promise<ImageMessage> {
-    console.log('message:\n', message)
+    console.log('message:\n', message);
 
     return {
-      media_id: message.MediaId!
-    }
+      media_id: message.MediaId!,
+    };
   }
   async generateVoiceMessageContent(message: WxMessage): Promise<VoiceMessage> {
-    console.log('message:\n', message)
+    console.log('message:\n', message);
 
     return {
-      media_id: message.MediaId!
-    }
+      media_id: message.MediaId!,
+    };
   }
   async generateVedioMessageContent(message: WxMessage): Promise<VedioMessage> {
-    console.log('message:\n', message)
+    console.log('message:\n', message);
 
     return {
       media_id: 'aaa',
       title: '娃哈哈',
-      description: 'whh'
-    }
+      description: 'whh',
+    };
   }
   async generateMusicMessageContent(message: WxMessage): Promise<MusicMessage> {
-    console.log('message:\n', message)
+    console.log('message:\n', message);
 
     return {
       media_id: 'aaa',
       title: '唱歌',
       description: 'music',
       music_url: '',
-      hq_music_url: ''
-    }
+      hq_music_url: '',
+    };
   }
   async generateNewsMessageContent(message: WxMessage): Promise<NewsMessage> {
-    console.log('message:\n', message)
+    console.log('message:\n', message);
 
     return {
       artical_count: 2,
@@ -254,16 +269,16 @@ export class WxService {
           title: '第一个',
           description: 'no1',
           pic_url: '',
-          url: ''
+          url: '',
         },
         {
           title: '第二个',
           description: 'no2',
           pic_url: '',
-          url: ''
-        }
-      ]
-    }
+          url: '',
+        },
+      ],
+    };
   }
   async generateResponse(message: WxMessage, nonce: string): Promise<string> {
     // ts报错？！
@@ -278,7 +293,7 @@ export class WxService {
     // const content = await this[handlers.text](message)
     // console.log('res-text:', content, message)
 
-    let content: MessageContentType[MessageType]
+    let content: MessageContentType[MessageType];
     switch (message.MsgType) {
       case 'text':
         content = await this.generateTextMessageContent(message);
@@ -309,26 +324,30 @@ export class WxService {
       nonce,
       timestamp,
       from: message.FromUserName,
-      to: message.ToUserName
+      to: message.ToUserName,
     });
   }
   // 处理消息，调用AI接口获取回复内容并返回回复内容中的字符串
   async generateResponseText(text: string) {
-    const { data } = await axios.post('/api/chat/once', { content: text });
-    return data.data;
+    try {
+      const { data } = await axios.post('/api/chat/once', { content: text });
+      return data.data;
+    } catch (e) {
+      return e.code;
+    }
   }
 
   sealResponseMsg({
-    type = 'text', 
-    content, 
-    nonce, 
-    timestamp, 
-    from, 
-    to
+    type = 'text',
+    content,
+    nonce,
+    timestamp,
+    from,
+    to,
   }: ResponseMsgParams) {
-    const msgTypeTamplate = '<MsgType><![CDATA[text]]></MsgType>'
+    const msgTypeTamplate = '<MsgType><![CDATA[text]]></MsgType>';
     const xmlMsgType = msgTypeTamplate.replace('text', type);
-    const xmlContent = this.generateContent(type, content)
+    const xmlContent = this.generateContent(type, content);
     const xmlResponse = `<xml>
           <ToUserName><![CDATA[${from}]]></ToUserName>
           <FromUserName><![CDATA[${to}]]></FromUserName>
@@ -404,18 +423,19 @@ export class WxService {
         `;
       }
       case 'news': {
-        const { artical_count, articals } = <NewsMessage>content
+        const { artical_count, articals } = <NewsMessage>content;
         return `
           <ArticleCount>${artical_count}</ArticleCount>
           <Articles>
-            ${articals.map(({ title, description, pic_url, url }) => `
+            ${articals.map(
+              ({ title, description, pic_url, url }) => `
                 <item>
                   <Title><![CDATA[${title}]]></Title>
                   <Description><![CDATA[${description}]]></Description>
                   <PicUrl><![CDATA[${pic_url}]]></PicUrl>
                   <Url><![CDATA[${url}]]></Url>
                 </item>
-              `
+              `,
             )}
           </Articles>
         `;
