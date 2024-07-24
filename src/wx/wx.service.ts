@@ -127,9 +127,8 @@ export class WxService {
     const res = await axios.get(
       `https://api.weixin.qq.com/cgi-bin/token?${params}`,
     );
-    console.log(params);
     console.log(res.data);
-
+    this.accessToken = res?.data?.access_token || '';
     return this.accessToken;
   }
   // 获取素材列表

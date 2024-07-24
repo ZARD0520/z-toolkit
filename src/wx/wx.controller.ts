@@ -103,6 +103,9 @@ export class WxController {
   @Get('material')
   async handleMaterial() {
     const token = await this.wxService.getAccessToken();
+    if (!token) {
+      return null;
+    }
     const res = await this.wxService.getMaterialList(token, {
       type: 'image',
       offset: 0,
