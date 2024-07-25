@@ -136,12 +136,11 @@ export class WxService {
     token: string,
     data: { type: string; offset: number; count: number },
   ) {
-    const params = token;
     const res = await axios.post(
-      `https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=${params}`,
+      `https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=${token}`,
       data,
     );
-    return res;
+    return res.data;
   }
 
   /**

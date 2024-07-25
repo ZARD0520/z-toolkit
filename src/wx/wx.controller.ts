@@ -106,11 +106,11 @@ export class WxController {
     if (!token) {
       return null;
     }
-    const res = await this.wxService.getMaterialList(token, {
+    const result = await this.wxService.getMaterialList(token, {
       type: 'image',
       offset: 0,
       count: 1,
     });
-    return res;
+    return result;
   }
 }
