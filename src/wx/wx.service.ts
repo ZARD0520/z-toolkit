@@ -142,6 +142,21 @@ export class WxService {
     );
     return res.data;
   }
+  // 创建菜单
+  async createMenu(token: string, data: any) {
+    const res = await axios.post(
+      `https://api.weixin.qq.com/cgi-bin/menu/create?access_token=${token}`,
+      data,
+    );
+    return res.data;
+  }
+  // 查询菜单
+  async getMenu(token: string) {
+    const res = await axios.get(
+      `https://api.weixin.qq.com/cgi-bin/get_current_selfmenu_info?access_token=${token}`,
+    );
+    return res.data;
+  }
 
   /**
    * 对密文进行解密
