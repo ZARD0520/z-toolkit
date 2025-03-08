@@ -6,7 +6,7 @@ export default () => ({
     username: process.env.username || 'root',
     password: process.env.password || 'password',
     database: process.env.database || 'test',
-    entities: [__dirname + '/../**/**/*.entity{.ts,.js}'],
+    entities: [__dirname + '/../../**/**/*.entity{.ts,.js}'],
     synchronize: process.env.NODE_ENV === 'development', // 仅在开发环境下同步
   },
 });

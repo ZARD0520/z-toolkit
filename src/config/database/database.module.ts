@@ -21,7 +21,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
-        entities: [__dirname + '/../**/**/*.entity{.ts,.js}'], // 实体文件路径
+        entities: [__dirname + '/../../**/**/*.entity{.ts,.js}'], // 实体文件路径
         synchronize: configService.get<boolean>('database.synchronize')
       }),
     })
