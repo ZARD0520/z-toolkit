@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './config/database/database.module';
@@ -9,6 +14,7 @@ import { ChatController } from './chat/chat.controller';
 import { ChatService } from './chat/chat.service';
 import { MonitorController } from './monitor/monitor.controller';
 import { MonitorService } from './monitor/monitor.service';
+import { TestMiddleware } from './core/middleware/test.middleware';
 
 @Module({
   imports: [DatabaseModule, RedisModule],
@@ -16,4 +22,10 @@ import { MonitorService } from './monitor/monitor.service';
   providers: [AppService, WxService, ChatService, MonitorService],
   // middlewares: [XMLMiddleware]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(TestMiddleware)
+      .forRoutes({ path: 'hello*', method: RequestMethod.GET });
+  }
+}
