@@ -2,7 +2,7 @@ export default () => ({
   database: {
     type: 'mysql',
     host: process.env.host || 'localhost',
-    port: process.env.port && parseInt(process.env.port, 10) || 3306,
+    port: (process.env.port && parseInt(process.env.port, 10)) || 3306,
     username: process.env.username || 'root',
     password: process.env.password || 'password',
     database: process.env.database || 'test',

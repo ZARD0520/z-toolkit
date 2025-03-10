@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { RedisService } from './redis.service';
-import redisConfig from './redis.config'
+import redisConfig from './redis.config';
 
 @Module({
   imports: [ConfigModule.forFeature(redisConfig)], // 加载 Redis 配置

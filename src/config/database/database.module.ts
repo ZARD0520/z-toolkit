@@ -22,9 +22,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
         entities: [__dirname + '/../../**/**/*.entity{.ts,.js}'], // 实体文件路径
-        synchronize: configService.get<boolean>('database.synchronize')
+        synchronize: configService.get<boolean>('database.synchronize'),
       }),
-    })
+    }),
   ],
 })
-export class DatabaseModule { }
+export class DatabaseModule {}

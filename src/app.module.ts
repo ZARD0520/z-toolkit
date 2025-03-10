@@ -16,4 +16,4 @@ import { MonitorService } from './monitor/monitor.service';
   providers: [AppService, WxService, ChatService, MonitorService],
   // middlewares: [XMLMiddleware]
 })
-export class AppModule { }
+export class AppModule {}
