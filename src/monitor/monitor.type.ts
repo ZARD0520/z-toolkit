@@ -19,3 +19,23 @@ export interface Log {
 export interface AddLogProps {
   data: Array<Log>;
 }
+
+export interface EventData {
+  // 定义具体的字段
+  [key: string]: any;
+}
+
+export interface DeviceInfo {
+  // 定义具体的字段
+  [key: string]: any;
+}
+
+export interface BrowserInfo {
+  // 定义具体的字段
+  [key: string]: any;
+}
+
+export interface PerformanceInfo {
+  // 定义具体的字段
+  [key: string]: any;
+}
