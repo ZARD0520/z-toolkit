@@ -15,9 +15,21 @@ import { ChatService } from './chat/chat.service';
 import { MonitorController } from './monitor/monitor.controller';
 import { MonitorService } from './monitor/monitor.service';
 import { TestMiddleware } from './core/middleware/test.middleware';
+import { MongooseModule } from '@nestjs/mongoose';
+import { MonitorEventsSchema } from './monitor/schema/MonitorEvents.schema';
+import { MonitorSessionSchema } from './monitor/schema/MonitorSession.schema';
+import { MonitorUserSchema } from './monitor/schema/MonitorUser.schema';
 
 @Module({
-  imports: [DatabaseModule, RedisModule],
+  imports: [
+    DatabaseModule,
+    RedisModule,
+    MongooseModule.forFeature([
+      { name: 'MonitorEvents', schema: MonitorEventsSchema },
+      { name: 'MonitorSession', schema: MonitorSessionSchema },
+      { name: 'MonitorUser', schema: MonitorUserSchema },
+    ]),
+  ],
   controllers: [AppController, WxController, ChatController, MonitorController],
   providers: [AppService, WxService, ChatService, MonitorService],
   // middlewares: [XMLMiddleware]

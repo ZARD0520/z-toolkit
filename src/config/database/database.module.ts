@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import databaseConfig from './database.config';
+import mysqlConfig from './mysql.config';
+import mongodbConfig from './mongodb.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig],
+      load: [mysqlConfig, mongodbConfig],
       envFilePath:
         '.env' + (process.env.NODE_ENV ? '.' + process.env.NODE_ENV : ''),
     }),
@@ -24,6 +26,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         entities: [__dirname + '/../../**/**/*.entity{.ts,.js}'], // 实体文件路径
         synchronize: configService.get<boolean>('database.synchronize'),
       }),
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('mongo.uri'), // 从配置中获取连接字符串
+        useNewUrlParser: configService.get<boolean>('mongo.useNewUrlParser'),
+        useUnifiedTopology: configService.get<boolean>(
+          'mongo.useUnifiedTopology',
+        ),
+      }),
+      inject: [ConfigService],
     }),
   ],
 })
