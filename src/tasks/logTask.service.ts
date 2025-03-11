@@ -3,14 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { RedisService } from '../config/redis/redis.service';
-import { Log } from '../monitor/entities/Log.entity';
+import { MonitorEvents } from '../monitor/entities/MonitorEvents.entity';
 
 @Injectable()
 export class LogTaskService {
   constructor(
     private readonly redisService: RedisService,
-    @InjectRepository(Log)
-    private readonly logRepository: Repository<Log>,
+    @InjectRepository(MonitorEvents)
+    private readonly logRepository: Repository<MonitorEvents>,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)

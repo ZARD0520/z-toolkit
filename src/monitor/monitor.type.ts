@@ -26,16 +26,25 @@ export interface EventData {
 }
 
 export interface DeviceInfo {
-  // 定义具体的字段
-  [key: string]: any;
+  type: string;
+  os: string;
+  browser: string;
+  resolution: string;
 }
 
-export interface BrowserInfo {
-  // 定义具体的字段
-  [key: string]: any;
+export interface LocationInfo {
+  country: string;
+  province: string;
+  city: string;
+  ip: string;
 }
 
 export interface PerformanceInfo {
+  // 定义具体的字段
+  [key: string]: any;
+}
+
+export interface AttributesInfo {
   // 定义具体的字段
   [key: string]: any;
 }
