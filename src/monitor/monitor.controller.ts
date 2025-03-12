@@ -9,8 +9,8 @@ export class MonitorController {
   constructor(private readonly monitorService: MonitorService) {}
 
   @Post('/add')
-  async add(@Body() data: AddLogProps) {
-    const result = await this.monitorService.addData(data);
+  async add(@Body() reqData: AddLogProps) {
+    const result = await this.monitorService.addData(reqData.data);
     return result;
   }
 

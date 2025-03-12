@@ -6,9 +6,10 @@ export const MonitorEventsSchema = new Schema({
   userId: { type: String, ref: 'MonitorUser' }, // 引用 MonitorUser
   eventType: { type: String, required: true },
   eventName: { type: String, required: true },
+  eventLevel: { type: String, required: true },
   pageUrl: { type: String },
+  pageTitle: { type: String },
   referrerUrl: { type: String },
-  version: { type: String },
   createTime: { type: Date, default: Date.now },
   eventData: { type: Object }, // JSON 数据
   errorMessage: { type: String },

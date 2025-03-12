@@ -8,16 +8,16 @@ export class RedisService {
     private readonly redisClient: Redis,
   ) {}
 
-  async set(key: string, value: string, ttl?: number): Promise<void> {
+  async set(key: string, value: any, ttl?: number): Promise<void> {
+    await this.redisClient.set(key, JSON.stringify(value));
     if (ttl) {
-      await this.redisClient.set(key, value, 'EX', ttl);
-    } else {
-      await this.redisClient.set(key, value);
+      await this.redisClient.expire(key, ttl);
     }
   }
 
   async get(key: string): Promise<string | null> {
-    return this.redisClient.get(key);
+    const data = await this.redisClient.get(key);
+    return data ? JSON.parse(data) : null;
   }
 
   async del(key: string): Promise<void> {

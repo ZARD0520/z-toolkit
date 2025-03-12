@@ -2,7 +2,6 @@ import { Schema, Document } from 'mongoose';
 import { AttributesInfo } from '../monitor.type';
 
 export const MonitorUserSchema = new Schema({
-  name: { type: String, required: true },
   lastActiveTime: { type: Date },
   attributes: { type: Object }, // JSON 数据
   sessions: [{ type: Schema.Types.ObjectId, ref: 'MonitorSession' }], // 引用 MonitorSession
