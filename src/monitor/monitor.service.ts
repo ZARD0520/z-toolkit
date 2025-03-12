@@ -18,11 +18,15 @@ export class MonitorService {
   }
 
   async handleData(data: LogDTO[]) {
-    for (let i = 0; i < data.length; i++) {
-      const item = data[i];
-      const key = `log:${item.userId || 'anonymous'}:${item.time || Date.now()}`;
-      await this.redisService.set(key, item, 86400); // 存储 24 小时
+    let monitorData = [];
+    const logs = await this.redisService.get('monitor-log');
+    if (logs) {
+      monitorData = [...data, ...logs];
+      await this.redisService.del('monitor-log');
+    } else {
+      monitorData = [...data];
     }
+    await this.redisService.set('monitor-log', monitorData, 86400); // 存储 24 小时
     return { success: true };
   }
 }

@@ -22,7 +22,7 @@ export class LogTaskService {
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async handleCron() {
-    const logs = await this.redisService.get('monitor-event-log');
+    const logs = await this.redisService.get('monitor-log');
     if (logs) {
       // 存储event相关数据
       const logDocuments = JSON.parse(logs);
@@ -76,6 +76,6 @@ export class LogTaskService {
     }
 
     // 删除redis缓存的埋点数据
-    await this.redisService.del('monitor-event-log');
+    await this.redisService.del('monitor-log');
   }
 }
