@@ -25,7 +25,7 @@ export class LogTaskService {
     const logs = await this.redisService.get('monitor-log');
     if (logs) {
       // 存储event相关数据
-      const logDocuments = JSON.parse(logs);
+      const logDocuments = logs;
       const insertedEvents = await this.logEventsModel.insertMany(logDocuments);
       for (const log of logDocuments) {
         // 存储会话相关数据
