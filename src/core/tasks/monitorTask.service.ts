@@ -27,65 +27,58 @@ export class MonitorTaskService {
     const monitorLog = await this.redisService.get('monitor-log');
     if (monitorLog) {
       // 处理数据
-      const { eventDataList /* , userDataList, sessionDataList */ } =
+      const { eventDataList, userDataList, sessionDataList } =
         await this.monitorService.handleRedisData(monitorLog);
-      // 存储event相关数据
-      console.log(
-        this.monitorEventsModel,
-        this.monitorSessionModel,
-        this.monitorUserModel,
-      );
-      await this.monitorEventsModel.insertMany(eventDataList);
-      // for (const log of logDocuments) {
-      //   // 存储会话相关数据
-      //   let session = await this.monitorSessionModel.findOne({
-      //     _id: log.sessionId,
-      //   });
-      //   if (!session) {
-      //     session = new this.monitorSessionModel({
-      //       _id: log.sessionId,
-      //       platform: log.platform,
-      //       startTime: new Date(log.timestamp),
-      //       deviceInfo: log.deviceInfo,
-      //       locationInfo: log.locationInfo,
-      //       userId: log.userId,
-      //     });
-      //     await session.save();
-      //   } else {
-      //     await session.updateOne({
-      //       $set: {
-      //         endTime: new Date(log.timestamp), // 还需额外写逻辑判断
-      //         deviceInfo: log.deviceInfo,
-      //         locationInfo: log.locationInfo,
-      //       },
-      //       $addToSet: { events: insertedEvents.map((event) => event._id) },
-      //     });
-      //   }
+      // 存储相关数据
+      const session = await this.monitorEventsModel.db.startSession();
+      session.startTransaction();
+      try {
+        // 存储MonitorUser
+        for (const userData of userDataList) {
+          const existingUser = await this.monitorUserModel
+            .findOne({ userId: userData.userId, projectId: userData.projectId })
+            .session(session);
+          if (existingUser) {
+            // 更新用户数据
+            existingUser.lastActiveTime = userData.lastActiveTime;
+            existingUser.sessions.push(...userData.sessions);
+            await existingUser.save({ session });
+          } else {
+            // 创建新用户
+            const newUser = new this.monitorUserModel(userData);
+            await newUser.save({ session });
+          }
+        }
+        // 存储MonitorSession
+        for (const sessionData of sessionDataList) {
+          const existingSession = await this.monitorSessionModel
+            .findById(sessionData._id)
+            .session(session);
 
-      //   // 存储用户相关数据
-      //   let user = await this.monitorUserModel.findOne({
-      //     userId: log.userId,
-      //     projectId: log.projectId,
-      //   });
-      //   if (!user) {
-      //     user = new this.monitorUserModel({
-      //       userId: log.userId,
-      //       projectId: log.projectId,
-      //       name: log.userName, // 假设日志中包含 userName
-      //       lastActiveTime: new Date(log.timestamp),
-      //       attributes: log.attributes,
-      //     });
-      //     await user.save();
-      //   } else {
-      //     await user.updateOne({
-      //       $set: {
-      //         lastActiveTime: new Date(log.timestamp),
-      //         attributes: log.attributes,
-      //       },
-      //       $addToSet: { sessions: session._id },
-      //     });
-      //   }
-      // }
+          if (existingSession) {
+            // 更新会话数据
+            existingSession.endTime = sessionData.endTime;
+            existingSession.events.push(...sessionData.events);
+            await existingSession.save({ session });
+          } else {
+            // 创建新会话
+            const newSession = new this.monitorSessionModel(sessionData);
+            await newSession.save({ session });
+          }
+        }
+        // 存储 MonitorEvents
+        await this.monitorEventsModel.insertMany(eventDataList);
+
+        // 提交事务
+        await session.commitTransaction();
+        session.endSession();
+      } catch (error) {
+        // 回滚事务
+        await session.abortTransaction();
+        session.endSession();
+        console.error('Error saving data to MongoDB:', error);
+        throw new Error('Failed to save data to MongoDB');
+      }
     }
 
     // 删除redis缓存的埋点数据

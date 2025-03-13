@@ -4,95 +4,159 @@ import { pageProps } from 'src/types/page';
 import { RedisService } from 'src/config/redis/redis.service';
 import { AddLogProps } from './monitor.type';
 import { TYPES } from 'src/utils/constants/monitor';
+import { MonitorEvents } from './schema/MonitorEvents.schema';
+import { MonitorUser } from './schema/MonitorUser.schema';
+import { MonitorSession } from './schema/MonitorSession.schema';
+import { Types } from 'mongoose';
+
+const { ObjectId } = Types;
 
 @Injectable()
 export class MonitorService {
   constructor(private readonly redisService: RedisService) {}
 
+  /**
+   * 添加埋点数据
+   * @param data 埋点数据
+   * @param sessionId 会话 ID
+   * @param platform 平台信息
+   */
   async addData(data: LogDTO[], sessionId: string, platform: string) {
-    // 写入
-    await this.handleAddData(data, sessionId, platform);
+    try {
+      await this.handleAddData(data, sessionId, platform);
+      return { success: true };
+    } catch (error) {
+      console.error('Error adding data:', error);
+      throw new Error('Failed to add data');
+    }
   }
 
+  /**
+   * 查询数据列表
+   * @param query 分页查询参数
+   */
   async getDataList(query: pageProps) {
     // 查询数据逻辑
     console.log(query);
+    // TODO: 实现具体查询逻辑
   }
 
+  /**
+   * 处理并存储埋点数据到 Redis
+   * @param data 埋点数据
+   * @param sessionId 会话 ID
+   * @param platform 平台信息
+   */
   async handleAddData(data: LogDTO[], sessionId: string, platform: string) {
-    let monitorData = [];
-    const logs = await this.redisService.get('monitor-log');
-    if (logs) {
-      monitorData = [{ data, sessionId, platform }, ...logs];
-      await this.redisService.del('monitor-log');
-    } else {
-      monitorData = [{ data, sessionId, platform }];
+    try {
+      const logs = await this.redisService.get('monitor-log');
+      const monitorData = logs
+        ? [{ data, sessionId, platform }, ...logs]
+        : [{ data, sessionId, platform }];
+      await this.redisService.set('monitor-log', monitorData, 86400); // 存储 24 小时
+    } catch (error) {
+      console.error('Error handling add data:', error);
+      throw new Error('Failed to handle add data');
     }
-    await this.redisService.set('monitor-log', monitorData, 86400); // 存储 24 小时
-    return { success: true };
   }
 
-  async handleRedisData(monitorData: AddLogProps[]) {
-    const eventDataList: any = [];
-    const userDataList: any = [];
-    const sessionDataList: any = [];
-    monitorData?.forEach((monitorItem) => {
-      const sessionId = monitorItem.sessionId;
-      const platform = monitorItem.platform;
-      // 处理用户相关数据
-      const userInfo = monitorItem?.data.find(
-        (item) => item.type.value === TYPES.USERINFO.value,
-      );
-      const userData = {
-        userId: userInfo?.userId || 'anonymous',
-        userName: userInfo?.userName || 'anonymous',
-        projectId: '',
-        lastActiveTime: Date.now(),
-        attributes: {},
-        sessionId,
-      };
-      // 处理会话相关数据
-      const sessionData = {
-        platform,
-        sessionId,
-        userId: userInfo?.userId || 'anonymous',
-        startTime: 0,
-        endTime: 0,
-        timezone: '',
-        language: '',
-        deviceInfo: {},
-        locationInfo: {},
-      };
-      // 处理事件相关数据
-      monitorItem?.data.forEach((item) => {
-        const eventData = {
-          userId: userInfo?.userId || 'anonymous',
-          userName: userInfo?.userName || 'anonymous',
-          sessionId: sessionId,
-          projectId: item.projectId,
-          eventType: item.type.value,
-          eventName: item.type.text,
-          eventLevel: item.level,
-          pageUrl: item.info?.pageUrl || '',
-          pageTitle: item.info?.pageTitle || '',
-          createTime: item.time,
-          eventData: item.data,
+  /**
+   * 处理 Redis 中的数据，转换为结构化数据
+   * @param monitorData Redis 中的原始数据
+   * @returns 结构化数据
+   */
+  async handleRedisData(monitorData: AddLogProps[]): Promise<{
+    eventDataList: MonitorEvents[];
+    userDataList: MonitorUser[];
+    sessionDataList: MonitorSession[];
+  }> {
+    const eventDataList: MonitorEvents[] = [];
+    const userDataList: MonitorUser[] = [];
+    const sessionDataList: MonitorSession[] = [];
+
+    try {
+      monitorData?.forEach((monitorItem) => {
+        const { sessionId, platform, data } = monitorItem;
+        // 提取用户信息
+        const userInfo = data.find(
+          (item) => item.type.value === TYPES.USERINFO.value,
+        );
+        const userId = userInfo?.userId || 'anonymous';
+        const userName = userInfo?.userName || 'anonymous';
+
+        // 初始化用户数据
+        const userData: any = {
+          userId,
+          userName,
+          projectId: '',
+          lastActiveTime: 0,
+          attributes: {},
+          sessions: [new ObjectId(sessionId)],
         };
-        eventDataList.push(eventData);
-        if (!userData.projectId) {
-          userData.projectId = item.projectId;
-        }
-        if (!sessionData.timezone && !sessionData.language) {
-          sessionData.timezone = item.info?.timezone || '+8';
-          sessionData.language = item.info?.language || 'en';
-          sessionData.deviceInfo = item.info?.deviceInfo;
-          sessionData.locationInfo = item.info?.locationInfo;
-        }
-        userData.lastActiveTime = Math.max(userData.lastActiveTime, item.time);
+
+        // 初始化会话数据
+        const sessionData: any = {
+          _id: new ObjectId(sessionId),
+          platform,
+          userId: new ObjectId(userId),
+          startTime: 0,
+          endTime: 0,
+          timezone: '',
+          language: '',
+          deviceInfo: {
+            type: '',
+            os: '',
+            browser: '',
+            resolution: '',
+          },
+          locationInfo: {
+            country: '',
+            province: '',
+            city: '',
+            ip: '',
+          },
+          events: [],
+        };
+
+        // 处理每个事件
+        data.forEach((item) => {
+          const eventData: any = {
+            sessionId,
+            userId,
+            projectId: item.projectId,
+            eventType: item.type.value,
+            eventName: item.type.text,
+            eventLevel: item.level,
+            pageUrl: item.info?.pageUrl || '',
+            pageTitle: item.info?.pageTitle || '',
+            createTime: item.time,
+            eventData: item.data,
+          };
+          eventDataList.push(eventData);
+
+          // 更新用户数据
+          if (!userData.projectId) {
+            userData.projectId = item.projectId;
+          }
+          userData.lastActiveTime = Math.max(
+            userData.lastActiveTime,
+            item.time,
+          );
+
+          // 更新会话数据
+          if (!sessionData.timezone && !sessionData.language) {
+            sessionData.timezone = item.info?.timezone || '+8';
+            sessionData.language = item.info?.language || 'en';
+            sessionData.deviceInfo = item.info?.deviceInfo || {};
+            sessionData.locationInfo = item.info?.locationInfo || {};
+          }
+          sessionData.events.push(eventData);
+        });
       });
-      userDataList.push(userData);
-      sessionDataList.push(sessionData);
-    });
-    return { eventDataList, userDataList, sessionDataList };
+      return { eventDataList, userDataList, sessionDataList };
+    } catch (error) {
+      console.error('Error handling Redis data:', error);
+      throw new Error('Failed to handle Redis data');
+    }
   }
 }
