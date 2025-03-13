@@ -3,8 +3,8 @@ import { DeviceInfo, LocationInfo } from '../monitor.type';
 
 export const MonitorSessionSchema = new Schema({
   platform: { type: String },
-  startTime: { type: Date, required: true },
-  endTime: { type: Date },
+  startTime: { type: Number, required: true },
+  endTime: { type: Number },
   timezone: { type: String },
   language: { type: String },
   deviceInfo: { type: Object }, // JSON 数据
@@ -15,8 +15,8 @@ export const MonitorSessionSchema = new Schema({
 
 export interface MonitorSession extends Document {
   platform?: string;
-  startTime: Date;
-  endTime?: Date;
+  startTime: number;
+  endTime?: number;
   timezone?: string;
   language?: string;
   deviceInfo: DeviceInfo; // JSON 数据

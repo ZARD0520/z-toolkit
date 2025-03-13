@@ -10,29 +10,19 @@ export const MonitorEventsSchema = new Schema({
   eventLevel: { type: String, required: true },
   pageUrl: { type: String },
   pageTitle: { type: String },
-  referrerUrl: { type: String },
-  createTime: { type: Date, default: Date.now },
+  createTime: { type: Number, required: true },
   eventData: { type: Object }, // JSON 数据
-  errorMessage: { type: String },
-  errorStack: { type: String },
-  errorCode: { type: String },
-  loadTime: { type: Date },
-  resourceSize: { type: Number },
 });
 
 export interface MonitorEvents extends Document {
   sessionId: Schema.Types.ObjectId;
   userId: Schema.Types.ObjectId;
+  projectId: string;
   eventType: string;
   eventName: string;
+  eventLevel: string;
   pageUrl?: string;
-  referrerUrl?: string;
-  version?: string;
-  createTime: Date;
+  pageTitle?: string;
+  createTime: number;
   eventData: EventData; // JSON 数据
-  errorMessage?: string;
-  errorStack?: string;
-  errorCode?: string;
-  loadTime?: Date;
-  resourceSize?: number;
 }

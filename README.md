@@ -14,8 +14,9 @@
   * 接收xml消息，解析为json
   * AES加解密（进行中）
 <!-- TODO LIST -->
-* 服务端数据库环境搭建&&库表初始化(先弄monitor表)
 * monitor服务编写
+  * interface adapter->mongo
+* 服务端数据库环境搭建&&库表初始化
 <!-- https://developers.weixin.qq.com/doc/offiaccount/Getting_Started/Getting_Started_Guide.html -->
 * 多进程服务
 * 内存泄漏监控

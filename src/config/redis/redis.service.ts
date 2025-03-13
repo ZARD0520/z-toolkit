@@ -15,12 +15,17 @@ export class RedisService {
     }
   }
 
-  async get(key: string): Promise<Array<any> | null> {
+  async get(key: string): Promise<any | null> {
     const data = await this.redisClient.get(key);
     return data ? JSON.parse(data) : null;
   }
 
   async del(key: string): Promise<void> {
     await this.redisClient.del(key);
+  }
+
+  async exists(key: string): Promise<boolean> {
+    const result = await this.redisClient.exists(key);
+    return result === 1;
   }
 }
