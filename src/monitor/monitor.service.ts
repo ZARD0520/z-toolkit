@@ -10,6 +10,7 @@ import { MonitorSession } from './schema/MonitorSession.schema';
 import { Types } from 'mongoose';
 
 const { ObjectId } = Types;
+const SESSION_TIMEOUT = 30 * 60 * 1000;
 
 @Injectable()
 export class MonitorService {
@@ -118,8 +119,12 @@ export class MonitorService {
           events: [],
         };
 
+        let maxEventTime = 0;
         // 处理每个事件
         data.forEach((item) => {
+          if (item.time > maxEventTime) {
+            maxEventTime = item.time;
+          }
           const eventData: any = {
             sessionId,
             userId,
@@ -151,6 +156,7 @@ export class MonitorService {
             sessionData.locationInfo = item.info?.locationInfo || {};
           }
           sessionData.events.push(eventData);
+          sessionData.endTime = maxEventTime + SESSION_TIMEOUT;
         });
       });
       return { eventDataList, userDataList, sessionDataList };
