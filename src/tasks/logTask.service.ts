@@ -24,6 +24,7 @@ export class LogTaskService {
   async handleCron() {
     const logs = await this.redisService.get('monitor-log');
     if (logs) {
+      // 处理数据
       // 存储event相关数据
       const logDocuments = logs;
       const insertedEvents = await this.logEventsModel.insertMany(logDocuments);
@@ -54,10 +55,14 @@ export class LogTaskService {
         }
 
         // 存储用户相关数据
-        let user = await this.monitorUserModel.findOne({ _id: log.userId });
+        let user = await this.monitorUserModel.findOne({
+          userId: log.userId,
+          projectId: log.projectId,
+        });
         if (!user) {
           user = new this.monitorUserModel({
-            _id: log.userId,
+            userId: log.userId,
+            projectId: log.projectId,
             name: log.userName, // 假设日志中包含 userName
             lastActiveTime: new Date(log.timestamp),
             attributes: log.attributes,

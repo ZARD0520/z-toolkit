@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LogDTO } from './monitor.type';
+import { LogDTO } from './dto/monitor.dto';
 import { pageProps } from 'src/core/type/page';
 import { RedisService } from 'src/config/redis/redis.service';
 

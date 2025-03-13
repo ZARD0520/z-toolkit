@@ -1,12 +1,4 @@
-export interface LogDTO {
-  type: string;
-  level: string;
-  data: EventData;
-  info: any;
-  userId?: string;
-  userName?: string;
-  time?: number;
-}
+import { LogDTO } from './dto/monitor.dto';
 
 export interface AddLogProps {
   data: Array<LogDTO>;

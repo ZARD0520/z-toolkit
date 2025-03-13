@@ -3,7 +3,8 @@ import { EventData } from '../monitor.type';
 
 export const MonitorEventsSchema = new Schema({
   sessionId: { type: Schema.Types.ObjectId, ref: 'MonitorSession' }, // 引用 MonitorSession
-  userId: { type: String, ref: 'MonitorUser' }, // 引用 MonitorUser
+  userId: { type: Schema.Types.ObjectId, ref: 'MonitorUser' }, // 引用 MonitorUser
+  projectId: { type: String, required: true },
   eventType: { type: String, required: true },
   eventName: { type: String, required: true },
   eventLevel: { type: String, required: true },
@@ -21,7 +22,7 @@ export const MonitorEventsSchema = new Schema({
 
 export interface MonitorEvents extends Document {
   sessionId: Schema.Types.ObjectId;
-  userId: string;
+  userId: Schema.Types.ObjectId;
   eventType: string;
   eventName: string;
   pageUrl?: string;

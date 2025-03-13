@@ -19,6 +19,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { MonitorEventsSchema } from './monitor/schema/MonitorEvents.schema';
 import { MonitorSessionSchema } from './monitor/schema/MonitorSession.schema';
 import { MonitorUserSchema } from './monitor/schema/MonitorUser.schema';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MonitorUserSchema } from './monitor/schema/MonitorUser.schema';
       { name: 'MonitorSession', schema: MonitorSessionSchema },
       { name: 'MonitorUser', schema: MonitorUserSchema },
     ]),
+    UserModule,
   ],
   controllers: [AppController, WxController, ChatController, MonitorController],
   providers: [AppService, WxService, ChatService, MonitorService],

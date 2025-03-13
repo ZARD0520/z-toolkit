@@ -9,7 +9,7 @@ export const MonitorSessionSchema = new Schema({
   language: { type: String },
   deviceInfo: { type: Object }, // JSON 数据
   locationInfo: { type: Object }, // JSON 数据
-  userId: { type: String, ref: 'MonitorUser' }, // 引用 MonitorUser
+  userId: { type: Schema.Types.ObjectId, ref: 'MonitorUser' }, // 引用 MonitorUser
   events: [{ type: Schema.Types.ObjectId, ref: 'MonitorEvents' }], // 引用 MonitorEvents
 });
 
@@ -21,6 +21,6 @@ export interface MonitorSession extends Document {
   language?: string;
   deviceInfo: DeviceInfo; // JSON 数据
   locationInfo: LocationInfo; // JSON 数据
-  userId: string;
+  userId: Schema.Types.ObjectId;
   events: Schema.Types.ObjectId[];
 }
