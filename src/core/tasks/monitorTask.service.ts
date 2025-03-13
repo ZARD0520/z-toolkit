@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { RedisService } from '../config/redis/redis.service';
-import { MonitorEvents } from '../monitor/schema/MonitorEvents.schema';
+import { RedisService } from '../../config/redis/redis.service';
+import { MonitorEvents } from '../../monitor/schema/MonitorEvents.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MonitorSession } from 'src/monitor/schema/MonitorSession.schema';
 import { MonitorUser } from 'src/monitor/schema/MonitorUser.schema';
 
 @Injectable()
-export class LogTaskService {
+export class MonitorTaskService {
   constructor(
     private readonly redisService: RedisService,
 
     @InjectModel('MonitorEvents')
-    private readonly logEventsModel: Model<MonitorEvents>,
+    private readonly monitorEventsModel: Model<MonitorEvents>,
     @InjectModel('MonitorSession')
     private readonly monitorSessionModel: Model<MonitorSession>,
     @InjectModel('MonitorUser')
@@ -27,7 +27,8 @@ export class LogTaskService {
       // 处理数据
       // 存储event相关数据
       const logDocuments = logs;
-      const insertedEvents = await this.logEventsModel.insertMany(logDocuments);
+      const insertedEvents =
+        await this.monitorEventsModel.insertMany(logDocuments);
       for (const log of logDocuments) {
         // 存储会话相关数据
         let session = await this.monitorSessionModel.findOne({

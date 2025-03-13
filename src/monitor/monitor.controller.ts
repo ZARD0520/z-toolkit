@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { MonitorService } from './monitor.service';
 import { AddLogProps } from './monitor.type';
-import { pageProps } from 'src/core/type/page';
+import { pageProps } from 'src/types/page';
 
 // 注入一个token校验的guard
 @Controller('monitor')
