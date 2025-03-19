@@ -3,6 +3,7 @@ import { LogDTO } from './dto/monitor.dto';
 export interface AddLogProps {
   platform: string;
   sessionId: string;
+  projectId: string;
   data: Array<LogDTO>;
 }
 

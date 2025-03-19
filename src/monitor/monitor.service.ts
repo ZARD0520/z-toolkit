@@ -77,7 +77,7 @@ export class MonitorService {
 
     try {
       monitorData?.forEach((monitorItem) => {
-        const { sessionId, platform, data } = monitorItem;
+        const { sessionId, platform, projectId, data } = monitorItem;
         // 提取用户信息
         const userInfo = data.find(
           (item) => item.type.value === TYPES.USERINFO.value,
@@ -128,7 +128,7 @@ export class MonitorService {
           const eventData: any = {
             sessionId,
             userId,
-            projectId: item.projectId,
+            projectId,
             eventType: item.type.value,
             eventName: item.type.text,
             eventLevel: item.level,
@@ -141,7 +141,7 @@ export class MonitorService {
 
           // 更新用户数据
           if (!userData.projectId) {
-            userData.projectId = item.projectId;
+            userData.projectId = projectId;
           }
           userData.lastActiveTime = Math.max(
             userData.lastActiveTime,
