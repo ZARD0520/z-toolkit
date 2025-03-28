@@ -22,9 +22,14 @@ export class MonitorService {
    * @param sessionId 会话 ID
    * @param platform 平台信息
    */
-  async addData(data: LogDTO[], sessionId: string, platform: string) {
+  async addData(
+    data: LogDTO[],
+    sessionId: string,
+    projectId: string,
+    platform: string,
+  ) {
     try {
-      await this.handleAddData(data, sessionId, platform);
+      await this.handleAddData(data, sessionId, projectId, platform);
       return { success: true };
     } catch (error) {
       console.error('Error adding data:', error);
@@ -48,12 +53,17 @@ export class MonitorService {
    * @param sessionId 会话 ID
    * @param platform 平台信息
    */
-  async handleAddData(data: LogDTO[], sessionId: string, platform: string) {
+  async handleAddData(
+    data: LogDTO[],
+    sessionId: string,
+    projectId: string,
+    platform: string,
+  ) {
     try {
       const logs = await this.redisService.get('monitor-log');
       const monitorData = logs
-        ? [{ data, sessionId, platform }, ...logs]
-        : [{ data, sessionId, platform }];
+        ? [{ data, sessionId, projectId, platform }, ...logs]
+        : [{ data, sessionId, projectId, platform }];
       await this.redisService.set('monitor-log', monitorData, 86400); // 存储 24 小时
     } catch (error) {
       console.error('Error handling add data:', error);

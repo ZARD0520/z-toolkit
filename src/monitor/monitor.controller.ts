@@ -28,9 +28,13 @@ export class MonitorController {
     if (!isValid) {
       throw new HttpException('Invalid Session ID', HttpStatus.FORBIDDEN);
     }
+    if (!reqData.projectId) {
+      throw new HttpException('Empty Project ID', HttpStatus.FORBIDDEN);
+    }
     const result = await this.monitorService.addData(
       reqData.data,
       reqData.sessionId,
+      reqData.projectId,
       reqData.platform,
     );
     return result;
