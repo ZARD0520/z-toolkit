@@ -1,38 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserService {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
   async register(registerUserDto: RegisterUserDto) {
-    // const users: User[] = await this.dbService.read();
-
-    // const foundUser = users.find(item => item.username === registerUserDto.username);
-
-    // if (foundUser) {
-    //   throw new BadRequestException('该用户已经注册');
-    // }
-
-    const user = new User();
+    const hashedPassword = await bcrypt.hash(registerUserDto.password, 10);
+    const user = this.userRepository.create({
+      username: registerUserDto.username,
+      password: hashedPassword,
+      email: registerUserDto.email,
+      roles: ['user'], // 默认角色
+    });
     user.username = registerUserDto.username;
     user.password = registerUserDto.password;
-    // users.push(user);
 
-    // await this.dbService.write(users);
-    return user;
+    return this.userRepository.save(user);
   }
 
-  async login(loginUserDto: LoginUserDto) {
-    // const users: User[] = await this.dbService.read();
-    // const foundUser = users.find(item => item.username === loginUserDto.username);
-    // if(!foundUser) {
-    //     throw new BadRequestException('用户不存在');
-    // }
-    // if(foundUser.password !== loginUserDto.password) {
-    //     throw new BadRequestException('密码不正确');
-    // }
-    // return foundUser;
-    return loginUserDto;
+  // 查找用户（用于登录校验）
+  async findOne(username: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { username } });
+  }
+
+  // 校验密码
+  async validateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.findOne(username);
+    if (user && (await bcrypt.compare(password, user.password))) {
+      return user;
+    }
+    return null;
   }
 }
