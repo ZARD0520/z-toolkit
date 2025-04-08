@@ -7,22 +7,17 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from './role.entity';
+import { Permission } from './permission.entity';
 
 @Entity()
-export class User {
+export class Role {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
-    length: 50,
+    length: 20,
   })
-  username: string;
-
-  @Column({
-    length: 50,
-  })
-  password: string;
+  name: string;
 
   @CreateDateColumn()
   createTime: Date;
@@ -30,12 +25,9 @@ export class User {
   @UpdateDateColumn()
   updateTime: Date;
 
-  @Column({ nullable: true })
-  email?: string;
-
-  @ManyToMany(() => Role)
+  @ManyToMany(() => Permission)
   @JoinTable({
-    name: 'user_role_relation',
+    name: 'role_permission_relation',
   })
-  roles: Role[];
+  permissions: Permission[];
 }

@@ -2,29 +2,47 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Permission } from '../../user/entities/permission.entity';
+import { UserService } from '../../user/user.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private userService: UserService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<string[]>(
-      'roles',
-      context.getHandler(),
-    );
-    if (!requiredRoles) return true; // 如果没有角色限制，直接放行
-
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (
-      !user?.roles ||
-      !user.roles.some((role: string) => requiredRoles.includes(role))
-    ) {
-      throw new ForbiddenException('无权访问');
+    if (!user) {
+      return true;
+    }
+
+    const roles = await this.userService.findRolesByIds(
+      user.roles?.map((item) => item.id),
+    );
+
+    const permissions: Permission[] = roles.reduce((total, current) => {
+      total.push(...current.permissions);
+      return total;
+    }, []);
+
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
+      'require-permission',
+      [context.getClass(), context.getHandler()],
+    );
+
+    for (let i = 0; i < requiredPermissions.length; i++) {
+      const curPermission = requiredPermissions[i];
+      const found = permissions.find((item) => item.name === curPermission);
+      if (!found) {
+        throw new UnauthorizedException('您没有访问该接口的权限');
+      }
     }
 
     return true;

@@ -2,40 +2,29 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from './role.entity';
 
 @Entity()
-export class User {
+export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
     length: 50,
   })
-  username: string;
+  name: string;
 
   @Column({
-    length: 50,
+    length: 100,
+    nullable: true,
   })
-  password: string;
+  desc: string;
 
   @CreateDateColumn()
   createTime: Date;
 
   @UpdateDateColumn()
   updateTime: Date;
-
-  @Column({ nullable: true })
-  email?: string;
-
-  @ManyToMany(() => Role)
-  @JoinTable({
-    name: 'user_role_relation',
-  })
-  roles: Role[];
 }
