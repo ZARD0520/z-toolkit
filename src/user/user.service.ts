@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { LoginUserDto } from './dto/login-user.dto';
 import { Role } from './entities/role.entity';
@@ -12,23 +12,30 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly roleRepository: Repository<Role>,
   ) {}
   async register(registerUserDto: RegisterUserDto) {
     const hashedPassword = await bcrypt.hash(registerUserDto.password, 10);
+
+    const defaultRole = await this.roleRepository.findOne({
+      where: { name: 'user' },
+    });
+    if (!defaultRole) {
+      throw new Error('Default role "user" not found');
+    }
+
     const user = this.userRepository.create({
       username: registerUserDto.username,
       password: hashedPassword,
       email: registerUserDto.email,
-      roles: ['user'], // 默认角色
+      roles: [defaultRole], // 默认角色
     });
-    user.username = registerUserDto.username;
-    user.password = registerUserDto.password;
 
     return this.userRepository.save(user);
   }
 
   async login(loginUserDto: LoginUserDto) {
-    const user = await this.userRepository.findOne(User, {
+    const user = await this.userRepository.findOne({
       where: {
         username: loginUserDto.username,
       },
@@ -53,6 +60,15 @@ export class UserService {
     return this.userRepository.findOne({ where: { username } });
   }
 
+  // 查找用户
+  async findUserById(userId: number) {
+    return await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+  }
+
   // 校验密码
   async validateUser(username: string, password: string): Promise<User | null> {
     const user = await this.findOne(username);
@@ -63,7 +79,7 @@ export class UserService {
   }
 
   async findRolesByIds(roleIds: number[]) {
-    return this.userRepository.find(Role, {
+    return this.roleRepository.find({
       where: {
         id: In(roleIds),
       },
