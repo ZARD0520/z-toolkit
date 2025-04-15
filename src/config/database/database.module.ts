@@ -25,6 +25,10 @@ import { MongooseModule } from '@nestjs/mongoose';
         database: configService.get<string>('database.database'),
         entities: [__dirname + '/../../**/**/*.entity{.ts,.js}'], // 实体文件路径
         synchronize: configService.get<boolean>('database.synchronize'),
+        poolSize: 10,
+        extra: {
+          authPlugin: 'sha256_password',
+        },
       }),
     }),
     MongooseModule.forRootAsync({

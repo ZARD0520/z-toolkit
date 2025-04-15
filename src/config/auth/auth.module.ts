@@ -12,7 +12,8 @@ import { LocalStrategy } from './local.strategy';
     PassportModule,
     JwtModule.register({
       secret: 'ZARD',
-      signOptions: { expiresIn: '24h' },
+      signOptions: { expiresIn: '30m' },
+      global: true,
     }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
