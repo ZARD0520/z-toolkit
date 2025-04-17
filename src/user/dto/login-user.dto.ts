@@ -1,10 +1,18 @@
-import { IsNotEmpty, MinLength } from 'class-validator';
+import { MinLength, IsOptional, IsEmail, Length } from 'class-validator';
 
 export class LoginUserDto {
-  @IsNotEmpty({ message: '用户名不能为空' })
-  username: string;
+  @IsOptional()
+  username?: string;
 
-  @IsNotEmpty({ message: '密码不能为空' })
+  @IsOptional()
   @MinLength(6, { message: '密码最少 6 位' })
-  password: string;
+  password?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @Length(6)
+  code?: string;
 }

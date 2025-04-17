@@ -20,6 +20,7 @@ import { MonitorEventsSchema } from './monitor/schema/MonitorEvents.schema';
 import { MonitorSessionSchema } from './monitor/schema/MonitorSession.schema';
 import { MonitorUserSchema } from './monitor/schema/MonitorUser.schema';
 import { UserModule } from './user/user.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UserModule } from './user/user.module';
       { name: 'MonitorUser', schema: MonitorUserSchema },
     ]),
     UserModule,
+    EmailModule,
   ],
   controllers: [AppController, WxController, ChatController, MonitorController],
   providers: [AppService, WxService, ChatService, MonitorService],

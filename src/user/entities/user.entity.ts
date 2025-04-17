@@ -30,7 +30,11 @@ export class User {
   @UpdateDateColumn()
   updateTime: Date;
 
-  @Column({ nullable: true })
+  @Column({
+    nullable: true,
+    length: 50,
+    comment: '邮箱地址',
+  })
   email?: string;
 
   @ManyToMany(() => Role)

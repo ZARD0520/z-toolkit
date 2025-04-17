@@ -89,6 +89,9 @@ importers:
       mysql2:
         specifier: ^3.10.0
         version: 3.10.0
+      nodemailer:
+        specifier: ^6.10.1
+        version: 6.10.1
       passport:
         specifier: ^0.7.0
         version: 0.7.0
@@ -125,7 +128,7 @@ importers:
         version: 10.3.2
       '@nestjs/schematics':
         specifier: ^10.0.0
-        version: 10.1.1(chokidar@3.6.0)(typescript@5.4.5)
+        version: 10.1.1(chokidar@4.0.3)(typescript@5.4.5)
       '@nestjs/testing':
         specifier: ^10.0.0
         version: 10.3.9(@nestjs/common@10.3.9(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.3.9(@nestjs/common@10.3.9(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.3.9)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.3.9(@nestjs/common@10.3.9(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.3.9))
@@ -147,6 +150,9 @@ importers:
       '@types/node':
         specifier: ^20.3.1
         version: 20.14.2
+      '@types/nodemailer':
+        specifier: ^6.4.17
+        version: 6.4.17
       '@types/qs':
         specifier: ^6.9.15
         version: 6.9.15
@@ -1449,6 +1455,9 @@ packages:
 
   '@types/node@20.14.2':
     resolution: {integrity: sha512-xyu6WAMVwv6AKFLB+e/7ySZVr/0zLCzOa7rSpq6jNwpqOrUbcACDWC+53d4n2QHOnDou0fbIsg8wZu/sxrnI4Q==}
+
+  '@types/nodemailer@6.4.17':
+    resolution: {integrity: sha512-I9CCaIp6DTldEg7vyUTZi8+9Vo0hi1/T8gv3C89yk1rSAAzoKQ8H8ki/jBYJSFoH/BisgLP8tkZMlQ91CIquww==}
 
   '@types/passport-jwt@4.0.1':
     resolution: {integrity: sha512-Y0Ykz6nWP4jpxgEUYq8NoVZeCQPo1ZndJLfapI249g1jHChvRfZRO/LS3tqu26YgAS/laI1qx98sYGz0IalRXQ==}
@@ -3850,6 +3859,10 @@ packages:
   node-releases@2.0.19:
     resolution: {integrity: sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==}
 
+  nodemailer@6.10.1:
+    resolution: {integrity: sha512-Z+iLaBGVaSjbIzQ4pX6XV41HrooLsQ10ZWPUehGmuantvzWoDVBnmsdUcOIDM1t+yPor5pDhVlDESgOMEGxhHA==}
+    engines: {node: '>=6.0.0'}
+
   nomnom@1.8.1:
     resolution: {integrity: sha512-5s0JxqhDx9/rksG2BTMVN1enjWSvPidpoSgViZU4ZXULyTe+7jxcCRLB6f42Z0l1xYJpleCBtSyY6Lwg3uu5CQ==}
     deprecated: Package no longer supported. Contact support@npmjs.com for more info.
@@ -5107,6 +5120,17 @@ snapshots:
     optionalDependencies:
       chokidar: 3.6.0
 
+  '@angular-devkit/core@17.1.2(chokidar@4.0.3)':
+    dependencies:
+      ajv: 8.12.0
+      ajv-formats: 2.1.1(ajv@8.12.0)
+      jsonc-parser: 3.2.0
+      picomatch: 3.0.1
+      rxjs: 7.8.1
+      source-map: 0.7.4
+    optionalDependencies:
+      chokidar: 4.0.3
+
   '@angular-devkit/core@18.2.8(chokidar@4.0.3)':
     dependencies:
       ajv: 8.17.1
@@ -5132,6 +5156,16 @@ snapshots:
   '@angular-devkit/schematics@17.1.2(chokidar@3.6.0)':
     dependencies:
       '@angular-devkit/core': 17.1.2(chokidar@3.6.0)
+      jsonc-parser: 3.2.0
+      magic-string: 0.30.5
+      ora: 5.4.1
+      rxjs: 7.8.1
+    transitivePeerDependencies:
+      - chokidar
+
+  '@angular-devkit/schematics@17.1.2(chokidar@4.0.3)':
+    dependencies:
+      '@angular-devkit/core': 17.1.2(chokidar@4.0.3)
       jsonc-parser: 3.2.0
       magic-string: 0.30.5
       ora: 5.4.1
@@ -6475,10 +6509,10 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@nestjs/schematics@10.1.1(chokidar@3.6.0)(typescript@5.4.5)':
+  '@nestjs/schematics@10.1.1(chokidar@4.0.3)(typescript@5.4.5)':
     dependencies:
-      '@angular-devkit/core': 17.1.2(chokidar@3.6.0)
-      '@angular-devkit/schematics': 17.1.2(chokidar@3.6.0)
+      '@angular-devkit/core': 17.1.2(chokidar@4.0.3)
+      '@angular-devkit/schematics': 17.1.2(chokidar@4.0.3)
       comment-json: 4.2.3
       jsonc-parser: 3.2.1
       pluralize: 8.0.0
@@ -6733,6 +6767,10 @@ snapshots:
   '@types/node@20.14.2':
     dependencies:
       undici-types: 5.26.5
+
+  '@types/nodemailer@6.4.17':
+    dependencies:
+      '@types/node': 20.14.2
 
   '@types/passport-jwt@4.0.1':
     dependencies:
@@ -9565,6 +9603,8 @@ snapshots:
   node-releases@2.0.14: {}
 
   node-releases@2.0.19: {}
+
+  nodemailer@6.10.1: {}
 
   nomnom@1.8.1:
     dependencies:

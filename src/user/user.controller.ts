@@ -5,6 +5,8 @@ import {
   Get,
   Query,
   UnauthorizedException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtService } from '@nestjs/jwt';
@@ -25,31 +27,35 @@ export class UserController {
 
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto) {
-    const user = await this.userService.login(loginUserDto);
+    try {
+      const user = await this.userService.login(loginUserDto);
 
-    const access_token = this.jwtService.sign(
-      {
-        userId: user.id,
-        username: user.username,
-      },
-      {
-        expiresIn: '30m',
-      },
-    );
+      const access_token = this.jwtService.sign(
+        {
+          userId: user.id,
+          username: user.username,
+        },
+        {
+          expiresIn: '30m',
+        },
+      );
 
-    const refresh_token = this.jwtService.sign(
-      {
-        userId: user.id,
-      },
-      {
-        expiresIn: '7d',
-      },
-    );
+      const refresh_token = this.jwtService.sign(
+        {
+          userId: user.id,
+        },
+        {
+          expiresIn: '7d',
+        },
+      );
 
-    return {
-      access_token,
-      refresh_token,
-    };
+      return {
+        access_token,
+        refresh_token,
+      };
+    } catch (e) {
+      throw new HttpException(e.message || '登录失败', HttpStatus.ACCEPTED);
+    }
   }
 
   @Get('refresh')
