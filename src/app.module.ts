@@ -21,6 +21,8 @@ import { MonitorSessionSchema } from './monitor/schema/MonitorSession.schema';
 import { MonitorUserSchema } from './monitor/schema/MonitorUser.schema';
 import { UserModule } from './user/user.module';
 import { EmailModule } from './email/email.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { RequestLogInterceptor } from './core/interceptor/requestLog/requestLog.interceptor';
 
 @Module({
   imports: [
@@ -35,7 +37,10 @@ import { EmailModule } from './email/email.module';
     EmailModule,
   ],
   controllers: [AppController, WxController, ChatController, MonitorController],
-  providers: [AppService, WxService, ChatService, MonitorService],
+  providers: [AppService, WxService, ChatService, MonitorService, {
+    provide: APP_INTERCEPTOR,
+    useClass: RequestLogInterceptor
+  }],
   // middlewares: [XMLMiddleware]
 })
 export class AppModule implements NestModule {
