@@ -8,6 +8,22 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // 微服务-提供者demo
+  // const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+  //   AppModule,
+  //   {
+  //     transport: Transport.TCP,
+  //     options: {
+  //       port: 8888,
+  //     },
+  //   },
+  // );
+  // 提供者Controller
+  // @MessagePattern('sum') or @EventPattern
+  // sum(numArr: Array<number>): number {
+  //   return numArr.reduce((total, item) => total + item, 0);
+  // }
+
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter()); // 如果在module注入，该异常过滤器可以使用provide的其他service
