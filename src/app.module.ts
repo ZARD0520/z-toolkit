@@ -23,20 +23,22 @@ import { UserModule } from './user/user.module';
 import { EmailModule } from './email/email.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { RequestLogInterceptor } from './core/interceptor/requestLog/requestLog.interceptor';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+// import { ClientsModule, Transport } from '@nestjs/microservices';
+import { SessionModule } from './session/session.module';
 
 @Module({
   imports: [
-    ClientsModule.register([
-      /* 微服务注册，使用时，像普通service一样直接注入，然后调用即可 */
-      {
-        name: 'xx_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          port: 8888
-        }
-      }
-    ]),
+    // ClientsModule.register([
+    //   /* 微服务注册，使用时，像普通service一样直接注入，然后调用即可 */
+    //   {
+    //     name: 'xx_SERVICE',
+    //     transport: Transport.TCP,
+    //     options: {
+    //       port: 8888,
+    //     },
+    //   },
+    // ]),
+    SessionModule,
     DatabaseModule,
     RedisModule,
     MongooseModule.forFeature([
@@ -48,10 +50,16 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     EmailModule,
   ],
   controllers: [AppController, WxController, ChatController, MonitorController],
-  providers: [AppService, WxService, ChatService, MonitorService, {
-    provide: APP_INTERCEPTOR,
-    useClass: RequestLogInterceptor
-  }],
+  providers: [
+    AppService,
+    WxService,
+    ChatService,
+    MonitorService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestLogInterceptor,
+    },
+  ],
   // middlewares: [XMLMiddleware]
 })
 export class AppModule implements NestModule {

@@ -1,4 +1,10 @@
-import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  Logger,
+  NestInterceptor,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { Request } from 'express';
 import { Observable, tap } from 'rxjs';
@@ -6,12 +12,9 @@ import * as requestIp from 'request-ip';
 
 @Injectable()
 export class RequestLogInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(RequestLogInterceptor.name)
+  private readonly logger = new Logger(RequestLogInterceptor.name);
 
-  intercept(
-    context: ExecutionContext,
-    next: CallHandler<any>,
-  ) {
+  intercept(context: ExecutionContext, next: CallHandler<any>) {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
@@ -22,9 +25,7 @@ export class RequestLogInterceptor implements NestInterceptor {
     const clientIp = requestIp.getClientIp(request) || ip;
 
     this.logger.debug(
-      `${method} ${path} ${clientIp} ${userAgent}: ${
-        context.getClass().name
-      } ${
+      `${method} ${path} ${clientIp} ${userAgent}: ${context.getClass().name} ${
         context.getHandler().name
       } invoked...`,
     );
