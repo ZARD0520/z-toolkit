@@ -6,7 +6,7 @@ import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { LoginUserDto } from './dto/login-user.dto';
 import { Role } from './entities/role.entity';
-import { RedisService } from 'src/config/redis/redis.service';
+import { RedisService } from '../config/redis/redis.service';
 
 @Injectable()
 export class UserService {

@@ -2,30 +2,30 @@ import {
   Controller,
   Get,
   HttpStatus,
-  Inject,
+  // Inject,
   Param,
   Query,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { testPipe } from './core/pipe/test.pipe';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { ClientProxy } from '@nestjs/microservices';
+// import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('/')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Inject('xx_SERVICE')
-  private xxClient: ClientProxy;
+  // @Inject('xx_SERVICE')
+  // private xxClient: ClientProxy;
 
-  @Get()
-  getHello(): string {
-    // 调用微服务模块的方法
-    // 微服务模块用@MessagePattern声明的方法，调用时用send，有返回值
-    // @EventPattern声明的方法，调用时用emit，无返回值
-    this.xxClient.send('xxx', 'xxx');
-    return this.appService.getHello();
-  }
+  // @Get()
+  // getHello(): string {
+  //   // 调用微服务模块的方法
+  //   // 微服务模块用@MessagePattern声明的方法，调用时用send，有返回值
+  //   // @EventPattern声明的方法，调用时用emit，无返回值
+  //   this.xxClient.send('xxx', 'xxx');
+  //   return this.appService.getHello();
+  // }
 
   /* 可以利用ApiTag进行分组 */
   @ApiOperation({ summary: '测试 aaa', description: 'aaa 描述' })

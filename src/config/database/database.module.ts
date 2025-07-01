@@ -16,20 +16,22 @@ import { MongooseModule } from '@nestjs/mongoose';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('database.host'),
-        port: configService.get<number>('database.port'),
-        username: configService.get<string>('database.username'),
-        password: configService.get<string>('database.password'),
-        database: configService.get<string>('database.database'),
-        entities: [__dirname + '/../../**/**/*.entity{.ts,.js}'], // 实体文件路径
-        synchronize: configService.get<boolean>('database.synchronize'),
-        poolSize: 10,
-        extra: {
-          authPlugin: 'sha256_password',
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: 'mysql',
+          host: configService.get<string>('database.host'),
+          port: configService.get<number>('database.port'),
+          username: configService.get<string>('database.username'),
+          password: configService.get<string>('database.password'),
+          database: configService.get<string>('database.database'),
+          entities: [__dirname + '/../../**/**/*.entity{.ts,.js}'], // 实体文件路径
+          synchronize: configService.get<boolean>('database.synchronize'),
+          poolSize: 10,
+          extra: {
+            authPlugin: 'sha256_password',
+          },
+        };
+      },
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
