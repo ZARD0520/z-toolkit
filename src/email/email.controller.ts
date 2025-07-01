@@ -10,7 +10,7 @@ export class EmailController {
   private redisService: RedisService;
 
   @Get('code')
-  async sendEmailCode(@Query('address') address) {
+  async sendEmailCode(@Query('address') address: any) {
     const code = Math.random().toString().slice(2, 8);
 
     await this.redisService.set(`captcha_ ${address}`, code, 5 * 60);

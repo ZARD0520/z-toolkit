@@ -8,7 +8,7 @@ export const TestA = (...args: string[]) => SetMetadata('aaa', args);
 
 export const TestB = createParamDecorator(
   (key: string, ctx: ExecutionContext) => {
-    const request: Request = ctx.switchToHttp().getRequest();
+    const request: any = ctx.switchToHttp().getRequest();
     return request.query[key];
   },
 );

@@ -24,10 +24,10 @@ export class RolesGuard implements CanActivate {
     }
 
     const roles = await this.userService.findRolesByIds(
-      user.roles?.map((item) => item.id),
+      user.roles?.map((item: any) => item.id),
     );
 
-    const permissions: Permission[] = roles.reduce((total, current) => {
+    const permissions: Permission[] = roles.reduce((total: any, current) => {
       total.push(...current.permissions);
       return total;
     }, []);

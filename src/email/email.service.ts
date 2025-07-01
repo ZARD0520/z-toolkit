@@ -18,11 +18,11 @@ export class EmailService {
     });
   }
 
-  async sendMail({ to, subject, html }) {
+  async sendMail({ to, subject, html }: any) {
     await this.transporter.sendMail({
       from: {
         name: '系统邮件',
-        address: this.configService.get('email_user'),
+        address: this.configService.get('email_user') || '',
       },
       to,
       subject,
