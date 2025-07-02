@@ -7,14 +7,29 @@ export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
   // 生成 JWT
-  async login(user: User) {
+  async generate(user: User) {
     const payload = {
       username: user.username,
-      sub: user.id,
+      userId: user.id,
       roles: user.roles,
     };
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, {
+        expiresIn: '30m',
+      }),
+      refresh_token: this.jwtService.sign(
+        {
+          userId: user.id,
+        },
+        {
+          expiresIn: '7d',
+        },
+      ),
     };
+  }
+
+  // 校验token
+  async verify(refreshToken: string) {
+    return this.jwtService.verify(refreshToken);
   }
 }

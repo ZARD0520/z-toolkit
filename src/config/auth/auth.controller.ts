@@ -1,4 +1,14 @@
-import { Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+  Query,
+  Request,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
@@ -13,8 +23,31 @@ export class AuthController {
   @Post('login')
   @UseGuards(AuthGuard('local')) // 使用 LocalStrategy
   async login(@Request() req: any) {
-    const user = await this.userService.login(req.user);
-    return this.authService.login(user);
+    try {
+      const user = await this.userService.login(req.user);
+      const res = this.authService.generate(user);
+      return res;
+    } catch (e) {
+      throw new HttpException(e.message || '登录失败', HttpStatus.ACCEPTED);
+    }
+  }
+
+  @Get('refresh')
+  async refresh(@Query('refresh_token') refreshToken: string) {
+    try {
+      const data = await this.authService.verify(refreshToken);
+
+      const user = await this.userService.findUserById(data.userId);
+
+      if (!user) {
+        return new UnauthorizedException('用户不存在');
+      }
+
+      const res = this.authService.generate(user);
+      return res;
+    } catch (e) {
+      throw new UnauthorizedException('token 已失效，请重新登录');
+    }
   }
 
   @Post('profile')
