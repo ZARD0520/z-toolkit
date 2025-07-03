@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { RedisService } from 'src/config/redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class SessionService {
+  @Inject(RedisService)
   private readonly redisService: RedisService;
 
   generateSessionId(): string {

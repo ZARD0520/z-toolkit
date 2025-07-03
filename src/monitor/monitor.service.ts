@@ -45,6 +45,12 @@ export class MonitorService {
     // 查询数据逻辑
     console.log(query);
     // TODO: 实现具体查询逻辑
+    return {
+      query,
+      res: {
+        mock: '123',
+      },
+    };
   }
 
   /**
