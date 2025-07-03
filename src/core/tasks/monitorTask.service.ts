@@ -24,64 +24,95 @@ export class MonitorTaskService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleCron() {
-    const monitorLog = await this.redisService.get('monitor-log');
-    if (monitorLog) {
-      // 处理数据
-      const { eventDataList, userDataList, sessionDataList } =
-        await this.monitorService.handleRedisData(monitorLog);
-      // 存储相关数据
-      const session = await this.monitorEventsModel.db.startSession();
-      session.startTransaction();
-      try {
-        // 存储MonitorUser
-        for (const userData of userDataList) {
-          const existingUser = await this.monitorUserModel
-            .findOne({ userId: userData.userId, projectId: userData.projectId })
-            .session(session);
-          if (existingUser) {
-            // 更新用户数据
-            existingUser.lastActiveTime = userData.lastActiveTime;
-            existingUser.sessions.push(...userData.sessions);
-            await existingUser.save({ session });
-          } else {
-            // 创建新用户
-            const newUser = new this.monitorUserModel(userData);
-            await newUser.save({ session });
-          }
-        }
-        // 存储MonitorSession
-        for (const sessionData of sessionDataList) {
-          const existingSession = await this.monitorSessionModel
-            .findById(sessionData._id)
-            .session(session);
+    const MAIN_KEY = 'monitor-log';
+    const LOCK_KEY = 'monitor-log-lock';
+    const PROCESSING_KEY = 'monitor-log-processing';
 
-          if (existingSession) {
-            // 更新会话数据
-            existingSession.endTime = sessionData.endTime;
-            existingSession.events.push(...sessionData.events);
-            await existingSession.save({ session });
-          } else {
-            // 创建新会话
-            const newSession = new this.monitorSessionModel(sessionData);
-            await newSession.save({ session });
-          }
-        }
-        // 存储 MonitorEvents
-        await this.monitorEventsModel.insertMany(eventDataList);
+    // 分布式锁
+    const lockAcquired = await this.redisService.set(
+      LOCK_KEY,
+      '1',
+      300, // 锁超时时间（秒）
+    );
 
-        // 提交事务
-        await session.commitTransaction();
-        session.endSession();
-      } catch (error) {
-        // 回滚事务
-        await session.abortTransaction();
-        session.endSession();
-        console.error('Error saving data to MongoDB:', error);
-        throw new Error('Failed to save data to MongoDB');
-      }
+    if (!lockAcquired) {
+      console.log('已有处理进程运行中，跳过本次执行');
+      return;
     }
 
-    // 删除redis缓存的埋点数据
-    await this.redisService.del('monitor-log');
+    try {
+      // 原子性地重命名当前key
+      await this.redisService.rename(MAIN_KEY, PROCESSING_KEY);
+
+      // 处理数据
+      const processingData = await this.redisService.get(PROCESSING_KEY);
+      try {
+        const { eventDataList, userDataList, sessionDataList } =
+          await this.monitorService.handleRedisData(processingData);
+
+        // 存储相关数据
+        const session = await this.monitorEventsModel.db.startSession();
+        session.startTransaction();
+
+        try {
+          // 存储MonitorUser
+          for (const userData of userDataList) {
+            const existingUser = await this.monitorUserModel
+              .findOne({
+                userId: userData.userId,
+                projectId: userData.projectId,
+              })
+              .session(session);
+            if (existingUser) {
+              // 更新用户数据
+              existingUser.lastActiveTime = userData.lastActiveTime;
+              existingUser.sessions.push(...userData.sessions);
+              await existingUser.save({ session });
+            } else {
+              // 创建新用户
+              const newUser = new this.monitorUserModel(userData);
+              await newUser.save({ session });
+            }
+          }
+          // 存储MonitorSession
+          for (const sessionData of sessionDataList) {
+            const existingSession = await this.monitorSessionModel
+              .findById(sessionData._id)
+              .session(session);
+
+            if (existingSession) {
+              // 更新会话数据
+              existingSession.endTime = sessionData.endTime;
+              existingSession.events.push(...sessionData.events);
+              await existingSession.save({ session });
+            } else {
+              // 创建新会话
+              const newSession = new this.monitorSessionModel(sessionData);
+              await newSession.save({ session });
+            }
+          }
+          // 存储 MonitorEvents
+          await this.monitorEventsModel.insertMany(eventDataList);
+
+          // 提交事务
+          await session.commitTransaction();
+          session.endSession();
+
+          await this.redisService.del(PROCESSING_KEY);
+        } catch (error) {
+          // 回滚事务
+          await session.abortTransaction();
+          session.endSession();
+          console.error('Error saving data to MongoDB:', error);
+
+          await this.redisService.lpush(MAIN_KEY, processingData);
+          throw new Error('Failed to save data to MongoDB');
+        }
+      } catch (err) {
+        console.error('数据处理失败:', err);
+      }
+    } finally {
+      await this.redisService.del(LOCK_KEY);
+    }
   }
 }
