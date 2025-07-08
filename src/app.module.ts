@@ -26,6 +26,7 @@ import { RequestLogInterceptor } from './core/interceptor/requestLog/requestLog.
 // import { ClientsModule, Transport } from '@nestjs/microservices';
 import { SessionModule } from './session/session.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MonitorTask } from './core/tasks/monitor.task';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     WxService,
     ChatService,
     MonitorService,
+    MonitorTask,
     {
       provide: APP_INTERCEPTOR,
       useClass: RequestLogInterceptor,
