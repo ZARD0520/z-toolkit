@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Query } from '@nestjs/common';
 import { EmailService } from './email.service';
-import { RedisService } from 'src/config/redis/redis.service';
+import { RedisService } from '../config/redis/redis.service';
 
 @Controller('email')
 export class EmailController {

@@ -4,9 +4,9 @@ import { RedisService } from '../../config/redis/redis.service';
 import { MonitorEvents } from '../../monitor/schema/MonitorEvents.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { MonitorSession } from 'src/monitor/schema/MonitorSession.schema';
-import { MonitorUser } from 'src/monitor/schema/MonitorUser.schema';
-import { MonitorService } from 'src/monitor/monitor.service';
+import { MonitorSession } from '../../monitor/schema/MonitorSession.schema';
+import { MonitorUser } from '../../monitor/schema/MonitorUser.schema';
+import { MonitorService } from '../../monitor/monitor.service';
 
 @Injectable()
 export class MonitorTaskService {
@@ -22,7 +22,7 @@ export class MonitorTaskService {
     private readonly monitorUserModel: Model<MonitorUser>,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_30_SECONDS)
   async handleCron() {
     const MAIN_KEY = 'monitor-log';
     const LOCK_KEY = 'monitor-log-lock';
@@ -46,6 +46,10 @@ export class MonitorTaskService {
 
       // 处理数据
       const processingData = await this.redisService.get(PROCESSING_KEY);
+      if (!processingData) {
+        console.log('无待处理数据');
+        return;
+      }
       try {
         const { eventDataList, userDataList, sessionDataList } =
           await this.monitorService.handleRedisData(processingData);

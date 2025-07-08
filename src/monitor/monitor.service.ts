@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { LogDTO } from './dto/monitor.dto';
-import { pageProps } from 'src/types/page';
-import { RedisService } from 'src/config/redis/redis.service';
+import { pageProps } from '../types/page';
+import { RedisService } from '../config/redis/redis.service';
 import { AddLogProps } from './monitor.type';
-import { TYPES } from 'src/utils/constants/monitor';
+import { TYPES } from '../utils/constants/monitor';
 import { MonitorEvents } from './schema/MonitorEvents.schema';
 import { MonitorUser } from './schema/MonitorUser.schema';
 import { MonitorSession } from './schema/MonitorSession.schema';

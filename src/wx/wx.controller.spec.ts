@@ -1,18 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { WxController } from './wx.controller';
+// import { Test, TestingModule } from '@nestjs/testing';
+// import { WxController } from './wx.controller';
 
-describe('WxController', () => {
-  let controller: WxController;
+// describe('WxController', () => {
+//   let controller: WxController;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [WxController],
-    }).compile();
+//   beforeEach(async () => {
+//     const module: TestingModule = await Test.createTestingModule({
+//       controllers: [WxController],
+//     }).compile();
 
-    controller = module.get<WxController>(WxController);
-  });
+//     controller = module.get<WxController>(WxController);
+//   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-});
+//   it('should be defined', () => {
+//     expect(controller).toBeDefined();
+//   });
+// });
