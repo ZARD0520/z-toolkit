@@ -9,7 +9,7 @@ import { MonitorUser } from '../../monitor/schema/MonitorUser.schema';
 import { MonitorService } from '../../monitor/monitor.service';
 
 @Injectable()
-export class MonitorTaskService {
+export class MonitorTask {
   constructor(
     private readonly redisService: RedisService,
     private readonly monitorService: MonitorService,

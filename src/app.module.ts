@@ -25,6 +25,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { RequestLogInterceptor } from './core/interceptor/requestLog/requestLog.interceptor';
 // import { ClientsModule, Transport } from '@nestjs/microservices';
 import { SessionModule } from './session/session.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { SessionModule } from './session/session.module';
     //     },
     //   },
     // ]),
+    ScheduleModule.forRoot(),
     SessionModule,
     DatabaseModule,
     RedisModule,
