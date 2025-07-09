@@ -7,9 +7,7 @@ import { TYPES } from '../utils/constants/monitor';
 import { MonitorEvents } from './schema/MonitorEvents.schema';
 import { MonitorUser } from './schema/MonitorUser.schema';
 import { MonitorSession } from './schema/MonitorSession.schema';
-import { Types } from 'mongoose';
 
-const { ObjectId } = Types;
 const SESSION_TIMEOUT = 30 * 60 * 1000;
 
 @Injectable()
@@ -108,14 +106,14 @@ export class MonitorService {
           projectId: '',
           lastActiveTime: 0,
           attributes: {},
-          sessions: [new ObjectId(sessionId)],
+          sessions: [sessionId],
         };
 
         // 初始化会话数据
         const sessionData: any = {
-          _id: new ObjectId(sessionId),
+          _id: sessionId,
           platform,
-          userId: new ObjectId(userId),
+          userId: userId,
           startTime: 0,
           endTime: 0,
           timezone: '',
@@ -147,7 +145,7 @@ export class MonitorService {
             projectId,
             eventType: item.type.value,
             eventName: item.type.text,
-            eventLevel: item.level,
+            eventLevel: item.level.value,
             pageUrl: item.info?.pageUrl || '',
             pageTitle: item.info?.pageTitle || '',
             createTime: item.time,

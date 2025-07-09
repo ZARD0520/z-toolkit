@@ -22,7 +22,7 @@ export class MonitorTask {
     private readonly monitorUserModel: Model<MonitorUser>,
   ) {}
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleCron() {
     const MAIN_KEY = 'monitor-log';
     const LOCK_KEY = 'monitor-log-lock';
@@ -45,14 +45,23 @@ export class MonitorTask {
       await this.redisService.rename(MAIN_KEY, PROCESSING_KEY);
 
       // 处理数据
-      const processingData = await this.redisService.get(PROCESSING_KEY);
-      if (!processingData) {
+      const processingData = await this.redisService.lrange(
+        PROCESSING_KEY,
+        0,
+        -1,
+      );
+      if (!processingData?.length) {
         console.log('无待处理数据');
         return;
       }
+
+      const parseProcessingData = processingData.map((item) =>
+        JSON.parse(item),
+      );
+      console.log(parseProcessingData, processingData);
       try {
         const { eventDataList, userDataList, sessionDataList } =
-          await this.monitorService.handleRedisData(processingData);
+          await this.monitorService.handleRedisData(parseProcessingData);
 
         // 存储相关数据
         const session = await this.monitorEventsModel.db.startSession();
@@ -109,7 +118,7 @@ export class MonitorTask {
           session.endSession();
           console.error('Error saving data to MongoDB:', error);
 
-          await this.redisService.lpush(MAIN_KEY, processingData);
+          await this.redisService.lpush(MAIN_KEY, ...processingData);
           throw new Error('Failed to save data to MongoDB');
         }
       } catch (err) {

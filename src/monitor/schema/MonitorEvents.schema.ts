@@ -1,13 +1,13 @@
-import { Schema, Document, Types } from 'mongoose';
+import { Schema, Document } from 'mongoose';
 import { EventData } from '../monitor.type';
 
 export const MonitorEventsSchema = new Schema({
   sessionId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'MonitorSession',
     required: true,
   }, // 引用 MonitorSession
-  userId: { type: Schema.Types.ObjectId, ref: 'MonitorUser', required: true }, // 引用 MonitorUser
+  userId: { type: String, ref: 'MonitorUser', required: true }, // 引用 MonitorUser
   projectId: { type: String, required: true },
   eventType: { type: String, required: true },
   eventName: { type: String, required: true },
@@ -19,8 +19,8 @@ export const MonitorEventsSchema = new Schema({
 });
 
 export interface MonitorEvents extends Document {
-  sessionId: Types.ObjectId;
-  userId: Types.ObjectId;
+  sessionId: string;
+  userId: string;
   projectId: string;
   eventType: string;
   eventName: string;

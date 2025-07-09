@@ -5,7 +5,10 @@ export interface LogDTO {
     value: string;
     text: string;
   };
-  level: string;
+  level: {
+    value: string;
+    text: string;
+  };
   data: EventData;
   info: any;
   projectId: string;

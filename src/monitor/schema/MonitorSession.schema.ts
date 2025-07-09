@@ -1,7 +1,8 @@
-import { Schema, Document, Types } from 'mongoose';
+import { Schema, Document } from 'mongoose';
 import { DeviceInfo, LocationInfo } from '../monitor.type';
 
 export const MonitorSessionSchema = new Schema({
+  _id: { type: String, required: true },
   platform: { type: String },
   startTime: { type: Number, required: true },
   endTime: { type: Number },
@@ -9,8 +10,8 @@ export const MonitorSessionSchema = new Schema({
   language: { type: String },
   deviceInfo: { type: Object }, // JSON 数据
   locationInfo: { type: Object }, // JSON 数据
-  userId: { type: Schema.Types.ObjectId, ref: 'MonitorUser', required: true }, // 引用 MonitorUser
-  events: [{ type: Schema.Types.ObjectId, ref: 'MonitorEvents' }], // 引用 MonitorEvents
+  userId: { type: String, ref: 'MonitorUser', required: true }, // 引用 MonitorUser
+  events: [{ type: String, ref: 'MonitorEvents' }], // 引用 MonitorEvents
 });
 
 export interface MonitorSession extends Document {
@@ -21,6 +22,6 @@ export interface MonitorSession extends Document {
   language?: string;
   deviceInfo: DeviceInfo; // JSON 数据
   locationInfo: LocationInfo; // JSON 数据
-  userId: Types.ObjectId;
-  events: Types.ObjectId[];
+  userId: string;
+  events: string[];
 }

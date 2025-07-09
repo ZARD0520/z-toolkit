@@ -31,8 +31,11 @@ export class RedisService {
   }
 
   async lpush(key: string, ...values: any[]): Promise<number> {
-    const stringValues = values.map((v: any) => JSON.stringify(v));
-    return this.redisClient.lpush(key, ...stringValues);
+    return this.redisClient.lpush(key, ...values);
+  }
+
+  async lrange(key: string, start: number, stop: number): Promise<string[]> {
+    return this.redisClient.lrange(key, start, stop);
   }
 
   async rename(srcKey: string, destKey: string): Promise<boolean> {
