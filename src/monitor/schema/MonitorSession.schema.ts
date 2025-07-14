@@ -2,7 +2,7 @@ import { Schema, Document } from 'mongoose';
 import { DeviceInfo, LocationInfo } from '../monitor.type';
 
 export const MonitorSessionSchema = new Schema({
-  _id: { type: String, required: true },
+  sessionId: { type: String, required: true, unique: true },
   platform: { type: String },
   startTime: { type: Number, required: true },
   endTime: { type: Number },
@@ -15,6 +15,7 @@ export const MonitorSessionSchema = new Schema({
 });
 
 export interface MonitorSession extends Document {
+  sessionId: string;
   platform?: string;
   startTime: number;
   endTime?: number;

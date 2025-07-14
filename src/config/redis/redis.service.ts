@@ -34,6 +34,10 @@ export class RedisService {
     return this.redisClient.lpush(key, ...values);
   }
 
+  async rpush(key: string, ...values: any[]): Promise<number> {
+    return this.redisClient.rpush(key, ...values);
+  }
+
   async lrange(key: string, start: number, stop: number): Promise<string[]> {
     return this.redisClient.lrange(key, start, stop);
   }
@@ -48,5 +52,13 @@ export class RedisService {
       }
       throw err;
     }
+  }
+
+  async expire(key: string, ttl: number): Promise<number> {
+    return this.redisClient.expire(key, ttl);
+  }
+
+  async llen(key: string) {
+    return this.redisClient.llen(key);
   }
 }

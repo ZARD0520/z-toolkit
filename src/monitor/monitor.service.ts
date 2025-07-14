@@ -64,11 +64,12 @@ export class MonitorService {
     platform: string,
   ) {
     try {
-      const logs = await this.redisService.get('monitor-log');
+      const logs = await this.redisService.lrange('monitor-log', 0, -1);
       const monitorData = logs
-        ? [{ data, sessionId, projectId, platform }, ...logs]
-        : [{ data, sessionId, projectId, platform }];
-      await this.redisService.set('monitor-log', monitorData, 86400); // 存储 24 小时
+        ? [JSON.stringify({ data, sessionId, projectId, platform }), ...logs]
+        : [JSON.stringify({ data, sessionId, projectId, platform })];
+      await this.redisService.rpush('monitor-log', ...monitorData);
+      await this.redisService.expire('monitor-log', 86400); // 存储 24 小时
     } catch (error) {
       console.error('Error handling add data:', error);
       throw new Error('Failed to handle add data');
@@ -111,7 +112,7 @@ export class MonitorService {
 
         // 初始化会话数据
         const sessionData: any = {
-          _id: sessionId,
+          sessionId: sessionId,
           platform,
           userId: userId,
           startTime: 0,
@@ -169,9 +170,11 @@ export class MonitorService {
             sessionData.deviceInfo = item.info?.deviceInfo || {};
             sessionData.locationInfo = item.info?.locationInfo || {};
           }
-          sessionData.events.push(eventData);
+          sessionData.startTime = maxEventTime;
           sessionData.endTime = maxEventTime + SESSION_TIMEOUT;
         });
+        userDataList.push(userData);
+        sessionDataList.push(sessionData);
       });
       return { eventDataList, userDataList, sessionDataList };
     } catch (error) {

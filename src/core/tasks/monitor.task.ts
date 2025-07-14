@@ -58,71 +58,78 @@ export class MonitorTask {
       const parseProcessingData = processingData.map((item) =>
         JSON.parse(item),
       );
-      console.log(parseProcessingData, processingData);
+
       try {
         const { eventDataList, userDataList, sessionDataList } =
           await this.monitorService.handleRedisData(parseProcessingData);
 
-        // 存储相关数据
-        const session = await this.monitorEventsModel.db.startSession();
-        session.startTransaction();
+        // MonitorEvents
+        const events = await this.monitorEventsModel.insertMany(eventDataList);
 
-        try {
-          // 存储MonitorUser
-          for (const userData of userDataList) {
-            const existingUser = await this.monitorUserModel
-              .findOne({
+        // MonitorUser
+        const userBulkOps = userDataList.map((userData) => ({
+          updateOne: {
+            filter: {
+              userId: userData.userId,
+              projectId: userData.projectId,
+            },
+            update: {
+              $setOnInsert: {
                 userId: userData.userId,
+                userName: userData.userName,
                 projectId: userData.projectId,
-              })
-              .session(session);
-            if (existingUser) {
-              // 更新用户数据
-              existingUser.lastActiveTime = userData.lastActiveTime;
-              existingUser.sessions.push(...userData.sessions);
-              await existingUser.save({ session });
-            } else {
-              // 创建新用户
-              const newUser = new this.monitorUserModel(userData);
-              await newUser.save({ session });
-            }
-          }
-          // 存储MonitorSession
-          for (const sessionData of sessionDataList) {
-            const existingSession = await this.monitorSessionModel
-              .findById(sessionData._id)
-              .session(session);
+                attributes: userData.attributes,
+              },
+              $set: { lastActiveTime: userData.lastActiveTime },
+              $addToSet: { sessions: { $each: userData.sessions } },
+            },
+            upsert: true,
+          },
+        }));
 
-            if (existingSession) {
-              // 更新会话数据
-              existingSession.endTime = sessionData.endTime;
-              existingSession.events.push(...sessionData.events);
-              await existingSession.save({ session });
-            } else {
-              // 创建新会话
-              const newSession = new this.monitorSessionModel(sessionData);
-              await newSession.save({ session });
-            }
-          }
-          // 存储 MonitorEvents
-          await this.monitorEventsModel.insertMany(eventDataList);
+        // MonitorSession
+        const sessionBulkOps = sessionDataList.map((sessionData) => ({
+          updateOne: {
+            filter: { sessionId: sessionData.sessionId },
+            update: {
+              $setOnInsert: {
+                sessionId: sessionData.sessionId,
+                platform: sessionData.platform,
+                startTime: sessionData.startTime,
+                timezone: sessionData.timezone,
+                language: sessionData.language,
+                deviceInfo: sessionData.deviceInfo,
+                userId: sessionData.userId,
+              },
+              $set: { endTime: sessionData.endTime },
+              $addToSet: {
+                events: {
+                  $each: events
+                    .filter((e) => e.sessionId === sessionData.sessionId)
+                    .map((e) => e._id),
+                },
+              },
+            },
+            upsert: true,
+          },
+        }));
 
-          // 提交事务
-          await session.commitTransaction();
-          session.endSession();
+        await Promise.all([
+          this.monitorUserModel.bulkWrite(userBulkOps),
+          this.monitorSessionModel.bulkWrite(sessionBulkOps),
+        ]);
 
-          await this.redisService.del(PROCESSING_KEY);
-        } catch (error) {
-          // 回滚事务
-          await session.abortTransaction();
-          session.endSession();
-          console.error('Error saving data to MongoDB:', error);
-
-          await this.redisService.lpush(MAIN_KEY, ...processingData);
-          throw new Error('Failed to save data to MongoDB');
-        }
+        await this.redisService.del(PROCESSING_KEY);
+        console.log(`成功处理 ${events.length} 条事件数据`);
       } catch (err) {
-        console.error('数据处理失败:', err);
+        console.error('数据存储失败:', err);
+        const remainingCount = await this.redisService.llen(PROCESSING_KEY);
+        if (remainingCount > 0) {
+          await this.redisService.lpush(
+            MAIN_KEY,
+            ...(await this.redisService.lrange(PROCESSING_KEY, 0, -1)),
+          );
+        }
       }
     } finally {
       await this.redisService.del(LOCK_KEY);
