@@ -98,8 +98,7 @@ export class MonitorTask {
                 startTime: sessionData.startTime,
                 timezone: sessionData.timezone,
                 language: sessionData.language,
-                deviceInfo: sessionData.deviceInfo,
-                userId: sessionData.userId,
+                deviceInfo: sessionData.deviceInfo
               },
               $set: { endTime: sessionData.endTime },
               $addToSet: {
@@ -108,6 +107,9 @@ export class MonitorTask {
                     .filter((e) => e.sessionId === sessionData.sessionId)
                     .map((e) => e._id),
                 },
+                userIds: {
+                  $each: sessionData.userIds
+                }
               },
             },
             upsert: true,

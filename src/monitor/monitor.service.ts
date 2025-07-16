@@ -97,7 +97,7 @@ export class MonitorService {
         const sessionData: any = {
           sessionId: sessionId,
           platform,
-          userId: '',
+          userIds: [],
           startTime: 0,
           endTime: 0,
           timezone: '',
@@ -151,8 +151,8 @@ export class MonitorService {
           }
 
           // 设置会话的用户ID
-          if (!sessionData.userId) {
-            sessionData.userId = userId;
+          if (!sessionData.userIds.includes(userId)) {
+            sessionData.userIds.push(userId);
           }
 
           const eventData: any = {
