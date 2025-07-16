@@ -3,7 +3,6 @@ import { LogDTO } from './dto/monitor.dto';
 import { pageProps } from '../types/page';
 import { RedisService } from '../config/redis/redis.service';
 import { AddLogProps } from './monitor.type';
-import { TYPES } from '../utils/constants/monitor';
 import { MonitorEvents } from './schema/MonitorEvents.schema';
 import { MonitorUser } from './schema/MonitorUser.schema';
 import { MonitorSession } from './schema/MonitorSession.schema';
@@ -93,28 +92,12 @@ export class MonitorService {
     try {
       monitorData?.forEach((monitorItem) => {
         const { sessionId, platform, projectId, data } = monitorItem;
-        // 提取用户信息
-        const userInfo = data.find(
-          (item) => item.type.value === TYPES.USERINFO.value,
-        );
-        const userId = userInfo?.userId || 'anonymous';
-        const userName = userInfo?.userName || 'anonymous';
-
-        // 初始化用户数据
-        const userData: any = {
-          userId,
-          userName,
-          projectId: '',
-          lastActiveTime: 0,
-          attributes: {},
-          sessions: [sessionId],
-        };
 
         // 初始化会话数据
         const sessionData: any = {
           sessionId: sessionId,
           platform,
-          userId: userId,
+          userId: '',
           startTime: 0,
           endTime: 0,
           timezone: '',
@@ -140,6 +123,38 @@ export class MonitorService {
           if (item.time > maxEventTime) {
             maxEventTime = item.time;
           }
+          // 用户信息
+          const userId = item.info?.userInfo?.userId || 'anonymous';
+          const userName = item.info?.userInfo?.userName || 'anonymous';
+
+          // 查找
+          let userData: any = userDataList.find((u) => u.userId === userId);
+          if (!userData) {
+            userData = {
+              userId,
+              userName,
+              projectId: projectId,
+              lastActiveTime: item.time,
+              attributes: {},
+              sessions: [sessionId],
+            };
+            userDataList.push(userData);
+          } else {
+            // 更新现有用户数据
+            userData.lastActiveTime = Math.max(
+              userData.lastActiveTime,
+              item.time,
+            );
+            if (!userData.sessions.includes(sessionId)) {
+              userData.sessions.push(sessionId);
+            }
+          }
+
+          // 设置会话的用户ID
+          if (!sessionData.userId) {
+            sessionData.userId = userId;
+          }
+
           const eventData: any = {
             sessionId,
             userId,
@@ -154,15 +169,6 @@ export class MonitorService {
           };
           eventDataList.push(eventData);
 
-          // 更新用户数据
-          if (!userData.projectId) {
-            userData.projectId = projectId;
-          }
-          userData.lastActiveTime = Math.max(
-            userData.lastActiveTime,
-            item.time,
-          );
-
           // 更新会话数据
           if (!sessionData.timezone && !sessionData.language) {
             sessionData.timezone = item.info?.timezone || '+8';
@@ -173,7 +179,6 @@ export class MonitorService {
           sessionData.startTime = maxEventTime;
           sessionData.endTime = maxEventTime + SESSION_TIMEOUT;
         });
-        userDataList.push(userData);
         sessionDataList.push(sessionData);
       });
       return { eventDataList, userDataList, sessionDataList };
