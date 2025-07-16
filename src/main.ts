@@ -29,6 +29,18 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter()); // 如果在module注入，该异常过滤器可以使用provide的其他service
   app.useGlobalInterceptors(new TransformInterceptor());
 
+  const corsOptions = {
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? ['https://your-production-domain.com'] // 生产环境只允许特定域名
+        : true, // 开发环境允许所有来源
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+    credentials: true,
+  };
+
+  app.enableCors(corsOptions);
+
   // 接口文档
   const config = new DocumentBuilder()
     .setTitle('Test example')
