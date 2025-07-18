@@ -40,8 +40,7 @@ services:
   mongodb:
     image: mongo:6.0
     ports:
-        - "${MONGO_PORT}:27017"
-    environment:
+      - "${MONGO_PORT}:27017"
     volumes:
       - ./mongodb/data:/data/db
       - ./mongodb/conf/mongod.conf:/etc/mongod.conf
