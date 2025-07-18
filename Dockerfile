@@ -1,29 +1,35 @@
-FROM node:20 as build-stage
+FROM node:20-alpine as build-stage
 
 WORKDIR /app
 
-COPY package.json .
+# 安装 pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-RUN npm config set registry https://registry.npmjs.org/
+# 复制依赖文件
+COPY package.json pnpm-lock.yaml* ./
 
-RUN npm install
+# 国内镜像源加速
+RUN pnpm config set registry https://registry.npmmirror.com && \
+    pnpm install --frozen-lockfile
 
+# 复制源码并构建
 COPY . .
-
-RUN npm run build
+RUN pnpm run build
 
 # production stage
-FROM node:20 as production-stage
-
-COPY --from=build-stage /app/dist /app
-COPY --from=build-stage /app/package.json /app/package.json
+FROM node:20-alpine
 
 WORKDIR /app
 
-RUN npm config set registry https://registry.npmjs.org/
+RUN npm install -g pm2
 
-RUN npm install --production
+COPY --from=build-stage /app/package.json .
+COPY --from=build-stage /app/pnpm-lock.yaml .
+COPY --from=build-stage /app/node_modules ./node_modules
+COPY --from=build-stage /app/dist ./dist
+
+COPY ecosystem.config.js ./
 
 EXPOSE 3001
 
-CMD ["node", "/app/main.js"]
+CMD ["pm2-runtime", "start", "dist/main.js"]
