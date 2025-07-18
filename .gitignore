@@ -4,6 +4,7 @@
 /build
 
 # env
+.env.development
 .env.production
 
 # Logs
