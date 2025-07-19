@@ -65,3 +65,4 @@ services:
 networks:
   common-network:
     driver: bridge
+    name: z-toolkit_common-network
