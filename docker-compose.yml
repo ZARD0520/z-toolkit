@@ -5,6 +5,7 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile
+    env_file: .env.production
     depends_on:
       - mysql-container
       - redis-container
