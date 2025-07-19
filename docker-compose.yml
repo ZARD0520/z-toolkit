@@ -20,7 +20,6 @@ services:
     ports:
       - "${SQL_PORT}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${SQL_PASSWORD}
       MYSQL_DATABASE: ${SQL_DATABASE}
       MYSQL_USER: ${SQL_USERNAME}
       MYSQL_PASSWORD: ${SQL_PASSWORD}
