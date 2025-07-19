@@ -27,7 +27,7 @@ services:
       - ./mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysql-container"]
       interval: 5s
       timeout: 10s
       retries: 3
