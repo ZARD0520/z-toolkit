@@ -23,7 +23,6 @@ services:
     environment:
       MYSQL_DATABASE: ${SQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${SQL_PASSWORD}
-    env_file: .env.production
     volumes:
       - ./mysql/data:/var/lib/mysql
       - ./mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
@@ -55,7 +54,6 @@ services:
     image: redis:7.0-alpine
     ports:
       - "${REDIS_PORT}:6379"
-    env_file: .env.production
     volumes:
       - ./redis/data:/data
       - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
