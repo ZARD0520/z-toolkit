@@ -32,7 +32,7 @@ export class MonitorTask {
     const lockAcquired = await this.redisService.set(
       LOCK_KEY,
       '1',
-      300, // 锁超时时间（秒）
+      60, // 锁超时时间（秒）
     );
 
     if (!lockAcquired) {
