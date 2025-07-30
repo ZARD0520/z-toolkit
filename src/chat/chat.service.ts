@@ -1,23 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { RolePreset, rolePresetMap } from './role-presets';
-
-type ModelType = 'gpt' | 'spark';
-type ChatServiceName = 'sealGptMessage' | 'sealSparkMessage';
-type ChatInfo = {
-  url: string;
-  appId: string | undefined;
-  appSecret: string | undefined;
-  appKey: string | undefined;
-};
-type modelConfigType = {
-  headers: object;
-  data: {
-    model: string;
-    messages: Array<object>;
-    stream: boolean;
-  };
-};
+import {
+  ChatInfo,
+  ChatServiceName,
+  modelConfigType,
+  ModelType,
+} from './chat.type';
 
 const getChatInfo = (model: string) => {
   if (model === 'spark') {

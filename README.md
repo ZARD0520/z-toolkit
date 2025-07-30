@@ -16,8 +16,9 @@
   - AES加解密（进行中）
   <!-- https://developers.weixin.qq.com/doc/offiaccount/Getting_Started/Getting_Started_Guide.html -->
 - monitor服务编写
-<!-- TODO LIST -->
 - 服务端数据库环境搭建&&库表初始化
+<!-- TODO LIST -->
+- Mcp服务编写
 - 用户服务
   - redis缓存权限
   - 鉴权链路打通

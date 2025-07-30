@@ -27,6 +27,7 @@ import { RequestLogInterceptor } from './core/interceptor/requestLog/requestLog.
 import { SessionModule } from './session/session.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MonitorTask } from './core/tasks/monitor.task';
+import { McpModule } from './mcp/mcp.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { MonitorTask } from './core/tasks/monitor.task';
     ]),
     UserModule,
     EmailModule,
+    McpModule,
   ],
   controllers: [AppController, WxController, ChatController, MonitorController],
   providers: [
