@@ -28,6 +28,8 @@ import { SessionModule } from './session/session.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MonitorTask } from './core/tasks/monitor.task';
 import { McpModule } from './mcp/mcp.module';
+import { SessionController } from './session/session.controller';
+import { SessionService } from './session/session.service';
 
 @Module({
   imports: [
@@ -54,12 +56,19 @@ import { McpModule } from './mcp/mcp.module';
     EmailModule,
     McpModule,
   ],
-  controllers: [AppController, WxController, ChatController, MonitorController],
+  controllers: [
+    AppController,
+    WxController,
+    ChatController,
+    MonitorController,
+    SessionController,
+  ],
   providers: [
     AppService,
     WxService,
     ChatService,
     MonitorService,
+    SessionService,
     MonitorTask,
     {
       provide: APP_INTERCEPTOR,

@@ -22,12 +22,12 @@ export class MonitorController {
 
   @Post('/add')
   async add(@Body() reqData: AddLogProps) {
-    // const isValid = await this.sessionService.validateSessionId(
-    //   reqData.sessionId,
-    // );
-    // if (!isValid) {
-    //   throw new HttpException('Invalid Session ID', HttpStatus.FORBIDDEN);
-    // }
+    const isValid = await this.sessionService.validateSessionId(
+      reqData.sessionId,
+    );
+    if (!isValid) {
+      throw new HttpException('Invalid Session ID', HttpStatus.FORBIDDEN);
+    }
     if (!reqData.projectId) {
       throw new HttpException('Empty Project ID', HttpStatus.FORBIDDEN);
     }

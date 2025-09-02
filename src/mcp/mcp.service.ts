@@ -7,7 +7,7 @@ import { buildPrompt } from '../utils/mcp';
 export class McpService {
   private examples: any[];
   constructor(/* aiClient */) {
-    this.loadExamples();
+    // this.loadExamples();
   }
 
   private loadExamples() {
