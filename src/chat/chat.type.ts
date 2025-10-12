@@ -5,6 +5,7 @@ export type ChatInfo = {
   appId: string | undefined;
   appSecret: string | undefined;
   appKey: string | undefined;
+  appPassword: string | undefined;
 };
 export type modelConfigType = {
   headers: object;
@@ -13,4 +14,8 @@ export type modelConfigType = {
     messages: Array<object>;
     stream: boolean;
   };
+};
+export type modelConfigParamsType = {
+  isStream: boolean;
+  rolePreset: string;
 };
