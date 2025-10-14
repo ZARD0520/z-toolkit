@@ -43,37 +43,22 @@ export class ChatController {
       // 调用流式服务
       const stream = await this.chatService.sealMessage(content, true);
 
-      let fullContent = '';
-
       // 处理流式数据
       for await (const chunk of stream) {
         const contentChunk = this.chatService.parseChunk(chunk);
         if (contentChunk) {
-          fullContent += contentChunk;
-          observer.next({
-            data: JSON.stringify({
-              type: 'chunk',
-              fullContent,
-              content: contentChunk,
-            }),
-          });
+          observer.next({ d: contentChunk });
         }
       }
 
       // 处理完成
       observer.next({
-        data: JSON.stringify({
-          type: 'done',
-          fullContent,
-        }),
+        f: 'finished',
       });
       observer.complete();
     } catch (err) {
       observer.error({
-        data: JSON.stringify({
-          error: err.message,
-          type: 'error',
-        }),
+        e: err.message,
       });
     }
   }
