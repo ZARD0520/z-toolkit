@@ -94,8 +94,8 @@ export class WxController {
 
   @Get('msg')
   async handleMsg() {
-    const message = '你知道黄俊杰吗';
-    const response = await this.chatService.sealMessage(message);
+    const message: string = '你知道黄俊杰吗';
+    const response = await this.chatService.sealMessage({ content: message });
     await this.wxService.getAccessToken();
     return response;
   }

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { Request } from 'express';
-import { Observable, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import * as requestIp from 'request-ip';
 
 @Injectable()

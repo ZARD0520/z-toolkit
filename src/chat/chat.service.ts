@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { RolePreset, rolePresetMap } from './role-presets';
-import { ChatServiceName, ModelType } from './chat.type';
+import { ChatServiceName, ModelType, ReqChatParamsType } from './chat.type';
 import { sealGptMessage } from './model/gpt';
 import { sealSparkMessage, parseChunk as parseSparkChunk } from './model/spark';
+import { AI_MODELS, MODEL_MAP } from '../constants/chat';
 
 @Injectable()
 export class ChatService {
-  private defaultModel: ModelType = 'spark';
+  private defaultModel: ModelType = MODEL_MAP[AI_MODELS.SPARK_LITE];
   private model = this.defaultModel;
   // 大模型的相关信息
   private rolePreset: string = rolePresetMap.programmer;
@@ -21,22 +22,24 @@ export class ChatService {
   setModel(model: ModelType) {
     this.model = model;
   }
-  sealMessage(
-    text: string,
-    isStream = false,
-    model: ModelType = this.defaultModel,
-  ) {
+  sealMessage(params: ReqChatParamsType, isStream = false) {
     const handlers: Record<ModelType, ChatServiceName> = {
       gpt: 'sealGptMessage',
-      spark: 'sealSparkMessage',
+      sparkLite: 'sealSparkMessage',
     };
-    return this[handlers[model]](text, {
+    if (params.model && MODEL_MAP[params.model]) {
+      this.setModel(MODEL_MAP[params.model]);
+    }
+    if (params.role && rolePresetMap[params.role]) {
+      this.setRolePreset(params.role);
+    }
+    return this[handlers[this.model]](params.content, {
       isStream,
       rolePreset: this.rolePreset,
     });
   }
   parseChunk(chunk: any) {
-    if (this.model === 'spark') {
+    if (this.model === 'sparkLite') {
       return parseSparkChunk(chunk);
     }
   }

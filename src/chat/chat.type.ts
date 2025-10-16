@@ -1,4 +1,6 @@
-export type ModelType = 'gpt' | 'spark';
+import { AI_MODELS } from 'src/constants/chat';
+
+export type ModelType = 'gpt' | 'sparkLite';
 export type ChatServiceName = 'sealGptMessage' | 'sealSparkMessage';
 export type ChatInfo = {
   url: string;
@@ -18,4 +20,9 @@ export type modelConfigType = {
 export type modelConfigParamsType = {
   isStream: boolean;
   rolePreset: string;
+};
+export type ReqChatParamsType = {
+  content: string;
+  model?: AI_MODELS;
+  role?: string;
 };
