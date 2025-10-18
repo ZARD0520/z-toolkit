@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Sse, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Observable } from 'rxjs';
 import { ReqChatParamsType } from './chat.type';
-import { AI_MODELS } from 'src/constants/chat';
+import { AI_MODELS, AI_ROLE } from '../constants/chat';
 
 @Controller('chat')
 export class ChatController {
@@ -24,7 +24,7 @@ export class ChatController {
   async generateOneTimeAnswer2(
     @Query('content') content: string,
     @Query('model') model: AI_MODELS,
-    @Query('role') role: string,
+    @Query('role') role: AI_ROLE,
   ) {
     const message = await this.chatService.sealMessage({
       content,
@@ -38,7 +38,7 @@ export class ChatController {
   async generateStreamAnswer(
     @Query('content') content: string,
     @Query('model') model: AI_MODELS,
-    @Query('role') role: string,
+    @Query('role') role: AI_ROLE,
   ) {
     return new Observable((observer) => {
       this.handleStreamAnswer({ content, model, role }, observer).catch(

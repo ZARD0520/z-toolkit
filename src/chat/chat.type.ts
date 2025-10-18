@@ -1,13 +1,17 @@
-import { AI_MODELS } from 'src/constants/chat';
+import { AI_MODELS, AI_ROLE } from '../constants/chat';
 
-export type ModelType = 'gpt' | 'sparkLite';
-export type ChatServiceName = 'sealGptMessage' | 'sealSparkMessage';
+export type ModelType = 'gpt' | 'sparkLite' | 'glm';
+export type ChatServiceName =
+  | 'sealGptMessage'
+  | 'sealSparkMessage'
+  | 'sealGlmMessage';
 export type ChatInfo = {
   url: string;
-  appId: string | undefined;
-  appSecret: string | undefined;
   appKey: string | undefined;
-  appPassword: string | undefined;
+  model: string;
+  appId?: string | undefined;
+  appSecret?: string | undefined;
+  appPassword?: string | undefined;
 };
 export type modelConfigType = {
   headers: object;
@@ -24,5 +28,5 @@ export type modelConfigParamsType = {
 export type ReqChatParamsType = {
   content: string;
   model?: AI_MODELS;
-  role?: string;
+  role?: AI_ROLE;
 };

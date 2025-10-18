@@ -1,19 +1,16 @@
 import axios from 'axios';
+import { getModelConfig } from '../../utils/model';
 import { ChatInfo, modelConfigParamsType, modelConfigType } from '../chat.type';
 import { Readable } from 'stream';
 import { createInterface } from 'readline';
-import { getModelConfig } from '../../utils/model';
 
 const chatInfo: ChatInfo = {
-  url: process.env.XF_APP_URL as string,
-  appKey: process.env.XF_APP_PASSWORD,
-  model: 'lite',
+  url: process.env.ZP_APP_URL as string,
+  appKey: process.env.ZP_APP_KEY,
+  model: 'glm-4.5',
 };
 
-export const sealSparkMessage = (
-  text: string,
-  config: modelConfigParamsType,
-) => {
+export const sealGlmMessage = (text: string, config: modelConfigParamsType) => {
   const modelConfig = getModelConfig(
     config.rolePreset,
     config.isStream,
@@ -24,7 +21,7 @@ export const sealSparkMessage = (
     : getResponse(text, modelConfig);
 };
 
-// 发起请求获取大模型回应
+// 普通对话
 const getResponse = async (text: string, modelConfig: modelConfigType) => {
   try {
     const { headers, data } = modelConfig;
@@ -58,7 +55,7 @@ const getResponse = async (text: string, modelConfig: modelConfigType) => {
   }
 };
 
-// 发起流式请求获取大模型回应
+// 流式对话
 async function* getResponseStream(text: string, modelConfig: modelConfigType) {
   try {
     const { headers, data } = modelConfig;
@@ -99,6 +96,7 @@ async function* processStreamResponse(stream: Readable) {
 
       try {
         const data = JSON.parse(dataStr);
+        console.log(data);
         yield data;
       } catch (parseError) {
         // 忽略解析错误，继续处理下一行
@@ -111,7 +109,7 @@ async function* processStreamResponse(stream: Readable) {
 
 export const parseChunk = (chunk: any) => {
   try {
-    // 根据讯飞星火API的格式解析
+    // 根据智谱API的格式解析
     if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
       return chunk.choices[0].delta.content || '';
     }
