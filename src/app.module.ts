@@ -30,6 +30,8 @@ import { MonitorTask } from './core/tasks/monitor.task';
 import { McpModule } from './mcp/mcp.module';
 import { SessionController } from './session/session.controller';
 import { SessionService } from './session/session.service';
+import { MediaResourceSchema } from './chat/schema/MediaResource.schema';
+import { MediaAlbumSchema } from './chat/schema/MediaAlbum.schema';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { SessionService } from './session/session.service';
       { name: 'MonitorEvents', schema: MonitorEventsSchema },
       { name: 'MonitorSession', schema: MonitorSessionSchema },
       { name: 'MonitorUser', schema: MonitorUserSchema },
+      { name: 'MediaAlbum', schema: MediaAlbumSchema },
+      { name: 'MediaResource', schema: MediaResourceSchema },
     ]),
     UserModule,
     EmailModule,
