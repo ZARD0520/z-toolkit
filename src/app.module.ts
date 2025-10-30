@@ -30,8 +30,8 @@ import { MonitorTask } from './core/tasks/monitor.task';
 import { McpModule } from './mcp/mcp.module';
 import { SessionController } from './session/session.controller';
 import { SessionService } from './session/session.service';
-import { MediaResourceSchema } from './chat/schema/MediaResource.schema';
-import { MediaAlbumSchema } from './chat/schema/MediaAlbum.schema';
+import { MediaResourceSchema } from './media/schema/MediaResource.schema';
+import { MediaAlbumSchema } from './media/schema/MediaAlbum.schema';
 
 @Module({
   imports: [
