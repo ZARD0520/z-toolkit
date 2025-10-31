@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { MonitorService } from './monitor.service';
 import { AddLogProps } from './monitor.type';
-import { pageProps } from 'src/types/page';
+import { pageProps } from 'src/common/types/pagination.type';
 import { SessionService } from 'src/session/session.service';
 
 // 注入一个token校验的guard

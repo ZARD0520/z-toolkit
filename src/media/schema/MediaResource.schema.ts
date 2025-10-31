@@ -1,4 +1,5 @@
 import { Schema, Document } from 'mongoose';
+import { MediaType } from '../mediaResource.type';
 
 export const MediaResourceSchema = new Schema({
   id: {
@@ -16,7 +17,7 @@ export const MediaResourceSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ['image', 'video', 'music'],
+    enum: MediaType,
     required: true,
   },
   album: {
@@ -32,42 +33,6 @@ export const MediaResourceSchema = new Schema({
     type: String,
     default: '',
   },
-  fileSize: {
-    type: Number,
-    default: 0,
-  },
-  mimeType: {
-    type: String,
-    default: '',
-  },
-  resolution: {
-    type: String,
-    default: '',
-  },
-  order: {
-    type: Number,
-    default: 0,
-  },
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
-  playCount: {
-    type: Number,
-    default: 0,
-  },
-  thumbnail: {
-    type: String,
-    default: '',
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
 });
 
 export interface MediaResourceType extends Document {
@@ -78,13 +43,4 @@ export interface MediaResourceType extends Document {
   album: number; // 关联专辑的 id
   duration: number | null;
   lyrics: string;
-  fileSize: number;
-  mimeType: string;
-  resolution: string;
-  order: number;
-  isActive: boolean;
-  playCount: number;
-  thumbnail: string;
-  createdAt: Date;
-  updatedAt: Date;
 }

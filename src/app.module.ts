@@ -32,6 +32,9 @@ import { SessionController } from './session/session.controller';
 import { SessionService } from './session/session.service';
 import { MediaResourceSchema } from './media/schema/MediaResource.schema';
 import { MediaAlbumSchema } from './media/schema/MediaAlbum.schema';
+import { MediaResourceController } from './media/mediaResource.controller';
+import { MediaResourceService } from './media/mediaResource.service';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -59,6 +62,7 @@ import { MediaAlbumSchema } from './media/schema/MediaAlbum.schema';
     UserModule,
     EmailModule,
     McpModule,
+    CommonModule,
   ],
   controllers: [
     AppController,
@@ -66,6 +70,7 @@ import { MediaAlbumSchema } from './media/schema/MediaAlbum.schema';
     ChatController,
     MonitorController,
     SessionController,
+    MediaResourceController,
   ],
   providers: [
     AppService,
@@ -73,6 +78,7 @@ import { MediaAlbumSchema } from './media/schema/MediaAlbum.schema';
     ChatService,
     MonitorService,
     SessionService,
+    MediaResourceService,
     MonitorTask,
     {
       provide: APP_INTERCEPTOR,

@@ -1,4 +1,5 @@
 import { Schema, Document } from 'mongoose';
+import { MediaType } from '../mediaResource.type';
 
 export const MediaAlbumSchema = new Schema({
   id: {
@@ -12,15 +13,19 @@ export const MediaAlbumSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ['single', 'album'],
+    enum: MediaType,
     required: true,
+  },
+  subType: {
+    type: String,
+    enum: ['single', 'album'],
   },
   cover: {
     type: String,
     default: '',
   },
   releaseDate: {
-    type: Date,
+    type: Number,
     default: null,
   },
   description: {
@@ -31,26 +36,6 @@ export const MediaAlbumSchema = new Schema({
     type: Number,
     default: 0,
   },
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
-  viewCount: {
-    type: Number,
-    default: 0,
-  },
-  tags: {
-    type: [String],
-    default: [],
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
 });
 
 export interface MediaAlbumType extends Document {
@@ -58,12 +43,7 @@ export interface MediaAlbumType extends Document {
   name: string;
   type: 'single' | 'album';
   cover: string;
-  releaseDate: Date;
+  releaseDate: number;
   description: string;
   mediaCount: number;
-  isActive: boolean;
-  viewCount: number;
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
 }
