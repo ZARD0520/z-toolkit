@@ -29,7 +29,7 @@ export class QueryMediaResourceListDto {
 }
 
 export class QueryMediaResourceDetailDto {
-  type: 'image' | 'video' | 'music';
+  type: MediaType;
   id?: number;
   name?: string;
 }
