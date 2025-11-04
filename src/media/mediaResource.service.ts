@@ -8,6 +8,7 @@ import {
 } from './mediaResource.type';
 import { MediaAlbumType } from './schema/MediaAlbum.schema';
 import { PaginationService } from '../common/services/pagination.service';
+import { DEFAULT_PAGE_QUERY } from '../constants/pagination';
 
 @Injectable()
 export class MediaResourceService {
@@ -39,12 +40,18 @@ export class MediaResourceService {
   async findAll(query: QueryMediaResourceListDto) {
     const { current, limit, type, albumName } = query;
 
-    return this.paginationService.paginate(this.mediaAlbumModel, {
-      current,
-      limit,
-      type,
-      albumName,
-    });
+    return this.paginationService.paginate(
+      this.mediaAlbumModel,
+      {
+        current: current || DEFAULT_PAGE_QUERY.CURRENT,
+        limit: limit || DEFAULT_PAGE_QUERY.LIMIT,
+        type,
+        albumName,
+      },
+      {
+        sort: { id: 1 },
+      },
+    );
   }
 
   // 根据ID && 类型查询资源详情

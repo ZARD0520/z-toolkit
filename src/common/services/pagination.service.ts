@@ -13,8 +13,10 @@ export class PaginationService {
     params: PaginationParams,
     options: PaginationOptions = {},
   ): Promise<PaginationResult<T>> {
-    const { limit, current, ...filters } = params;
+    params.current = Number(params.current);
+    params.limit = Number(params.limit);
 
+    const { limit, current, ...filters } = params;
     const skip = (current - 1) * limit;
 
     const filter = this.buildFilter(filters);
@@ -30,14 +32,15 @@ export class PaginationService {
       ]);
 
       // 计算分页信息
-      const total = Math.ceil(totalItems / limit);
+      const pages = Math.ceil(totalItems / limit);
 
       return {
         data,
         pagination: {
           current,
           limit,
-          total,
+          pages,
+          total: totalItems,
         },
       };
     } catch (error) {

@@ -15,6 +15,7 @@ export interface PaginationResult<T> {
     current: number;
     limit: number;
     total: number;
+    pages: number;
   };
 }
 export interface PaginationOptions {
