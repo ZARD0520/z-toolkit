@@ -19,7 +19,7 @@ services:
   mysql-container:
     image: mysql
     ports:
-      - "${SQL_PORT}:3306"
+      - "127.0.0.1:${SQL_PORT}"
     environment:
       MYSQL_DATABASE: ${SQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${SQL_PASSWORD}
@@ -39,12 +39,14 @@ services:
   mongo-container:
     image: mongo:6.0
     ports:
-      - "${MONGO_PORT}:27017"
-    env_file: .env.production
+      - "127.0.0.1:${MONGO_PORT}"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     volumes:
       - ./mongodb/data:/data/db
       - ./mongodb/conf/mongod.conf:/etc/mongod.conf
-    command: ["--config", "/etc/mongod.conf"]
+    command: ["--config", "/etc/mongod.conf", "--auth", "--bind_ip_all=false"]
     restart: unless-stopped
     networks:
       - common-network
@@ -53,7 +55,7 @@ services:
   redis-container:
     image: redis:7.0-alpine
     ports:
-      - "${REDIS_PORT}:6379"
+      - "127.0.0.1:${REDIS_PORT}"
     volumes:
       - ./redis/data:/data
       - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
