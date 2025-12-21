@@ -46,7 +46,7 @@ services:
     volumes:
       - ./mongodb/data:/data/db
       - ./mongodb/conf/mongod.conf:/etc/mongod.conf
-    command: ["--config", "/etc/mongod.conf", "--auth", "--bind_ip_all=false"]
+    command: ["--config", "/etc/mongod.conf", "--auth"]
     restart: unless-stopped
     networks:
       - common-network
