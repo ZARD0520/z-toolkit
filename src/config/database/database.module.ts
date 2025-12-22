@@ -27,21 +27,39 @@ import { MongooseModule } from '@nestjs/mongoose';
           entities: [__dirname + '/../../**/**/*.entity{.ts,.js}'], // 实体文件路径
           synchronize: configService.get<boolean>('database.synchronize'),
           poolSize: 10,
-          extra: {
-            authPlugin: 'sha256_password',
-          },
         };
       },
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('mongo.uri'), // 从配置中获取连接字符串
-        useNewUrlParser: configService.get<boolean>('mongo.useNewUrlParser'),
-        useUnifiedTopology: configService.get<boolean>(
-          'mongo.useUnifiedTopology',
-        ),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const uri =
+          configService.get<string>('mongo.uri') ||
+          'mongodb://localhost:27017/wezard';
+        const username = configService.get<string>('mongo.username');
+        const password = configService.get<string>('mongo.password');
+
+        // 构建带认证的连接字符串
+        let authUri = uri;
+        if (username && password) {
+          try {
+            const url = new URL(uri);
+            // 对用户名和密码进行 URL 编码，防止特殊字符导致连接失败
+            url.username = encodeURIComponent(username);
+            url.password = encodeURIComponent(password);
+            // 添加 authSource=admin，因为 root 用户默认在 admin 数据库中
+            url.searchParams.set('authSource', 'admin');
+            authUri = url.toString();
+          } catch (error) {
+            // 如果URL解析失败，使用原始URI
+            authUri = uri;
+          }
+        }
+
+        return {
+          uri: authUri,
+        };
+      },
       inject: [ConfigService],
     }),
   ],
