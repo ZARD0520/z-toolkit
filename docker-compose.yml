@@ -23,6 +23,7 @@ services:
     environment:
       MYSQL_DATABASE: ${SQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${SQL_PASSWORD}
+      MYSQL_ROOT_HOST: '%'
     volumes:
       - ./mysql/data:/var/lib/mysql
       - ./mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
