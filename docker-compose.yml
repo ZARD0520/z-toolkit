@@ -7,13 +7,17 @@ services:
       dockerfile: ./Dockerfile
     env_file: .env.production
     depends_on:
-      - mysql-container
-      - redis-container
-      - mongo-container
+      mysql-container:
+        condition: service_healthy
+      redis-container:
+        condition: service_started
+      mongo-container:
+        condition: service_started
     ports:
       - 3000:3000
     networks:
       - common-network
+    restart: unless-stopped
 
   # mysql
   mysql-container:
@@ -49,6 +53,11 @@ services:
       - ./mongodb/conf/mongod.conf:/etc/mongod.conf
     command: ["--config", "/etc/mongod.conf", "--auth"]
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
     networks:
       - common-network
 
@@ -62,6 +71,11 @@ services:
       - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
     command: redis-server --requirepass ${REDIS_PASSWORD}
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
     networks:
       - common-network
 
