@@ -50,6 +50,7 @@ import { MongooseModule } from '@nestjs/mongoose';
           uri = `mongodb://${host}:${port}/${database}`;
         }
 
+        console.log(111111, uri);
         return {
           uri,
         };
