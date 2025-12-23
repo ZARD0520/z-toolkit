@@ -39,6 +39,11 @@ import { MongooseModule } from '@nestjs/mongoose';
         const username = configService.get<string>('mongo.username');
         const password = configService.get<string>('mongo.password');
 
+        console.log('=== MongoDB 配置调试信息 ===');
+        console.log('原始 URI:', uri);
+        console.log('用户名:', username);
+        console.log('密码:', password ? '****' : '空');
+
         // 构建带认证的连接字符串
         let authUri = uri;
         if (username && password) {
@@ -50,8 +55,14 @@ import { MongooseModule } from '@nestjs/mongoose';
             // 添加 authSource=admin，因为 root 用户默认在 admin 数据库中
             url.searchParams.set('authSource', 'admin');
             authUri = url.toString();
+            console.log(
+              '最终连接字符串（脱敏）:',
+              authUri.replace(/:[^:@]+@/, ':****@'),
+            );
           } catch (error) {
             // 如果URL解析失败，使用原始URI
+            console.error('URL 解析错误:', error.message);
+            console.log('使用原始 URI:', uri);
             authUri = uri;
           }
         }
