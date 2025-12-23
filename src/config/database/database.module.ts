@@ -33,42 +33,25 @@ import { MongooseModule } from '@nestjs/mongoose';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const uri =
-          configService.get<string>('mongo.uri') ||
-          'mongodb://localhost:27017/wezard';
+        let uri;
+        const host = configService.get<string>('mongo.host');
+        const port = configService.get<string>('mongo.port') || '27017';
         const username = configService.get<string>('mongo.username');
         const password = configService.get<string>('mongo.password');
-
-        console.log('=== MongoDB 配置调试信息 ===');
-        console.log('原始 URI:', uri);
-        console.log('用户名:', username);
-        console.log('密码:', password ? '****' : '空');
+        const database = configService.get<string>('mongo.database');
 
         // 构建带认证的连接字符串
-        let authUri = uri;
         if (username && password) {
-          try {
-            const url = new URL(uri);
-            // 对用户名和密码进行 URL 编码，防止特殊字符导致连接失败
-            url.username = encodeURIComponent(username);
-            url.password = encodeURIComponent(password);
-            // 添加 authSource=admin，因为 root 用户默认在 admin 数据库中
-            url.searchParams.set('authSource', 'admin');
-            authUri = url.toString();
-            console.log(
-              '最终连接字符串（脱敏）:',
-              authUri.replace(/:[^:@]+@/, ':****@'),
-            );
-          } catch (error) {
-            // 如果URL解析失败，使用原始URI
-            console.error('URL 解析错误:', error.message);
-            console.log('使用原始 URI:', uri);
-            authUri = uri;
-          }
+          // 对用户名和密码进行URL编码
+          const encodedUsername = encodeURIComponent(username);
+          const encodedPassword = encodeURIComponent(password);
+          uri = `mongodb://${encodedUsername}:${encodedPassword}@${host}:${port}/${database}?authSource=admin`;
+        } else {
+          uri = `mongodb://${host}:${port}/${database}`;
         }
 
         return {
-          uri: authUri,
+          uri,
         };
       },
       inject: [ConfigService],
